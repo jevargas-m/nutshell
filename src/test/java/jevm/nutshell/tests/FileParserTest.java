@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Arrays;
 
 class FileParserTest {
 
@@ -15,17 +14,23 @@ class FileParserTest {
         File f = new File ("res/text_test1.txt");
         FileParser fp = new FileParser(f);
 
-        for (int i = 0; i < 10; i++) {
-            String s1 = fp.nextSentence();
-            System.out.println(i + " " + s1);
-        }
+        String s = fp.nextSentence();
+        assertEquals("alice looked at the jury box", s);
 
+        s = fp.nextSentence();
+        assertEquals("and saw that", s);
 
+        s = fp.nextSentence();
+        assertEquals("in her haste", s);
 
+        s = fp.nextSentence();
+        assertEquals("she had put the lizard in", s);
 
+        s = fp.nextSentence();
+        assertEquals("head downwards", s);
 
-
-
+        s = fp.nextSentence();
+        assertEquals("and the poor little thing was waving its tail about in a melancholy way", s);
     }
 
 }
