@@ -1,0 +1,2 @@
+This file is used to test graph construction, this word in file.
+Is this a graph construction test. isolated.

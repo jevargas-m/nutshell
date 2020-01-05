@@ -4,20 +4,18 @@ import java.util.*;
 
 public class WordsGraph {
     protected Map<String, WordData> adjacencySets = new HashMap<>();
-    protected int numWords = 0;
     protected int numEdges = 0;
 
     protected class WordData {
-        Set<Edge> setOfEdges = new HashSet<>();
+        Map<Edge, Integer> weightedEdges = new HashMap<>(); // Weighted Edge
         int frequency = 0;
         int inDegree = 0;
         int outDegree = 0;
     }
 
-    protected class Edge {
+    protected static class Edge {
         public String source;
         public String destination;
-        public int frequency;
 
         public Edge(String source, String destination) {
             this.source = source;
@@ -39,6 +37,13 @@ public class WordsGraph {
         }
     }
 
+    public void addWord(String word) {
+        if (word == null) return;
+        WordData data = adjacencySets.getOrDefault(word, new WordData());;
+        data.frequency++;
+        adjacencySets.put(word, data);
+    }
+
     public void addWord(String from, String to) {
         if (from == null) return;
         WordData fromData, toData;
@@ -46,27 +51,26 @@ public class WordsGraph {
         fromData = adjacencySets.getOrDefault(from, new WordData());
         toData = adjacencySets.getOrDefault(to, new WordData());
 
-        /* update word frequencies */
         fromData.frequency++;
-        toData.frequency++;
         Edge newEdge = new Edge(from, to);
-        if (fromData.setOfEdges.contains(newEdge)) {
-            newEdge.frequency++;  // update edge weight
+
+        if (fromData.weightedEdges.containsKey(newEdge)) {
+            Integer frequency = fromData.weightedEdges.get(newEdge);
+            frequency++;  // update edge weight
+            fromData.weightedEdges.put(newEdge, frequency);
         } else {
             // if edge is new, update degrees and add to set
             fromData.outDegree++;
             toData.inDegree++;
-            fromData.setOfEdges.remove(newEdge); // eliminate old edge
+            numEdges++;
+            fromData.weightedEdges.put(newEdge, 1); //add edge to set
         }
 
         if (to != null) {
             adjacencySets.put(to, toData);
-            numWords++;
-            numEdges++;
-            fromData.setOfEdges.add(newEdge); //add edge to set
         }
+        
         adjacencySets.put(from, fromData);
-        numWords++;
     }
 
     public Map<String, WordData> getAdjacencySets() {
@@ -74,7 +78,7 @@ public class WordsGraph {
     }
 
     public int getNumWords() {
-        return numWords;
+        return adjacencySets.size();
     }
 
     public int getNumEdges() {
