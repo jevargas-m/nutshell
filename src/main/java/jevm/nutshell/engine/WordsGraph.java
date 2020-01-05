@@ -44,7 +44,8 @@ public class WordsGraph {
         adjacencySets.put(word, data);
     }
 
-    public void addWord(String from, String to) {
+    // Only from frequency is updated
+    public void addPair(String from, String to) {
         if (from == null) return;
         WordData fromData, toData;
 
@@ -63,14 +64,24 @@ public class WordsGraph {
             fromData.outDegree++;
             toData.inDegree++;
             numEdges++;
-            fromData.weightedEdges.put(newEdge, 1); //add edge to set
+            fromData.weightedEdges.put(newEdge, 1); //add new edge to set
         }
 
         if (to != null) {
             adjacencySets.put(to, toData);
         }
-        
+
         adjacencySets.put(from, fromData);
+    }
+
+    public void addSentence(String sentence, String delim) {
+        String[] words = sentence.split(delim);
+        if (words.length < 1) return;
+
+        for (int i = 0; i < words.length - 1; i++) {
+            addPair(words[i], words[i + 1]);
+        }
+        addWord(words[words.length - 1]);
     }
 
     public Map<String, WordData> getAdjacencySets() {

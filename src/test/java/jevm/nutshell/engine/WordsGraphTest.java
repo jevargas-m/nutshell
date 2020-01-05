@@ -5,10 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Map;
-import java.util.Set;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class WordsGraphTest {
 
@@ -23,7 +19,7 @@ class WordsGraphTest {
             String[] words = sentence.split(" ");
 
             for (int i = 0; i < words.length - 1; i++) {
-                graph.addWord(words[i], words[i + 1]);
+                graph.addPair(words[i], words[i + 1]);
             }
             graph.addWord(words[words.length - 1]);
         }
@@ -44,8 +40,19 @@ class WordsGraphTest {
             }
             System.out.println(" }");
         }
+    }
 
+    @Test
+    void testGraphConstruction2() throws FileNotFoundException {
+        File f = new File ("res/alice.txt");
+        FileParser fp = new FileParser(f);
+        WordsGraph graph = new WordsGraph();
 
+        while (fp.hasNext()) {
+            graph.addSentence(fp.nextSentence(), " ");
+        }
 
+        System.out.println("Alice word count = " + graph.getNumWords());
+        System.out.println("Alice edge count = " + graph.getNumEdges());
     }
 }
