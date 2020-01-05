@@ -14,22 +14,22 @@ class FileParserTest {
         File f = new File ("res/text_test1.txt");
         FileParser fp = new FileParser(f);
 
-        String s = fp.nextSentence();
+        String s = fp.nextLine();
         assertEquals("alice looked at the jury box", s);
 
-        s = fp.nextSentence();
+        s = fp.nextLine();
         assertEquals("and saw that", s);
 
-        s = fp.nextSentence();
+        s = fp.nextLine();
         assertEquals("in her haste", s);
 
-        s = fp.nextSentence();
+        s = fp.nextLine();
         assertEquals("she had put the lizard in", s);
 
-        s = fp.nextSentence();
+        s = fp.nextLine();
         assertEquals("head downwards", s);
 
-        s = fp.nextSentence();
+        s = fp.nextLine();
         assertEquals("and the poor little thing was waving its tail about in a melancholy way", s);
     }
 

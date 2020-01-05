@@ -19,11 +19,11 @@ class WordsGraphTest {
         WordsGraph graph = new WordsGraph();
 
         while (fp.hasNext()) {
-            String sentence = fp.nextSentence();
+            String sentence = fp.nextLine();
             String[] words = sentence.split(" ");
 
             for (int i = 0; i < words.length - 1; i++) {
-                graph.addPair(words[i], words[i + 1]);
+                graph.addEdge(words[i], words[i + 1]);
             }
             graph.addWord(words[words.length - 1]);
         }
@@ -53,7 +53,7 @@ class WordsGraphTest {
         WordsGraph graph = new WordsGraph();
 
         while (fp.hasNext()) {
-            graph.addSentence(fp.nextSentence(), " ");
+            graph.addSentence(fp.nextLine(), " ");
         }
 
         System.out.println("Alice word count = " + graph.getNumWords());

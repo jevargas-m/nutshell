@@ -20,21 +20,24 @@ public class WordsGraph {
 
     public WordsGraph(Parser parser, String wordDelimiter) {
         this();
+        addAll(parser, wordDelimiter);
+    }
 
+    public void addAll(Parser parser, String wordDelimiter) {
         while (parser.hasNext()) {
-            addSentence(parser.nextSentence(), wordDelimiter);
+            addSentence(parser.nextLine(), wordDelimiter);
         }
     }
 
 
-    protected class WordData {
+    public class WordData {
         Map<Edge, Integer> weightedEdges = new HashMap<>(); // Weighted Edge
         int frequency = 0;
         int inDegree = 0;
         int outDegree = 0;
     }
 
-    protected class Edge {
+    public class Edge {
         public String source;
         public String destination;
 
@@ -71,7 +74,7 @@ public class WordsGraph {
     }
 
     // Only from frequency is updated
-    public void addPair(String from, String to) {
+    public void addEdge(String from, String to) {
         if (from == null || from.equals("")) return;
         WordData fromData, toData;
 
@@ -109,7 +112,7 @@ public class WordsGraph {
         if (words.length == 0) return;
 
         for (int i = 0; i < words.length - 1; i++) {
-            addPair(words[i], words[i + 1]);
+            addEdge(words[i], words[i + 1]);
         }
         addWord(words[words.length - 1]);
     }

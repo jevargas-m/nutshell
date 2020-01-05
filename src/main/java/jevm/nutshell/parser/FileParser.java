@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 public class FileParser implements Parser {
 
-    public static String SENTENCE_DELIMITERS = "[.,;`'\":?!]";
+    public static String SENTENCE_DELIMITERS = "[.,;`\":?!\\n]";
 
     private Scanner scanner;
 
@@ -21,13 +21,13 @@ public class FileParser implements Parser {
     }
 
     @Override
-    public String nextSentence() {
+    public String nextLine() {
         String s = scanner.next();
         s = s.trim();
         s = s.replace('\n', ' '); //eliminate intermediate newline
         s = s.toLowerCase();
         if (s.length() == 0 && scanner.hasNext()) {
-            return nextSentence();
+            return nextLine();
         } else {
             return s;
         }
