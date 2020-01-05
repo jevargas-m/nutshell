@@ -1,10 +1,31 @@
 package jevm.nutshell.engine;
 
+import jevm.nutshell.parser.Parser;
+
 import java.util.*;
 
 public class WordsGraph {
-    protected Map<String, WordData> adjacencySets = new HashMap<>();
+    public static final String DEFAULT_WORD_DELIMITER = "\\s";
+
+    protected Map<String, WordData> adjacencySets;
     protected int numEdges = 0;
+
+    public WordsGraph() {
+        adjacencySets = new HashMap<>();
+    }
+
+    public WordsGraph(Parser parser) {
+        this(parser, DEFAULT_WORD_DELIMITER);
+    }
+
+    public WordsGraph(Parser parser, String wordDelimiter) {
+        this();
+
+        while (parser.hasNext()) {
+            addSentence(parser.nextSentence(), wordDelimiter);
+        }
+    }
+
 
     protected class WordData {
         Map<Edge, Integer> weightedEdges = new HashMap<>(); // Weighted Edge
@@ -13,7 +34,7 @@ public class WordsGraph {
         int outDegree = 0;
     }
 
-    protected static class Edge {
+    protected class Edge {
         public String source;
         public String destination;
 
@@ -35,10 +56,15 @@ public class WordsGraph {
         public int hashCode() {
             return source.hashCode() + destination.hashCode();
         }
+
+        @Override
+        public String toString() {
+            return source + "->" + destination;
+        }
     }
 
     public void addWord(String word) {
-        if (word == null) return;
+        if (word == null || word.equals("")) return;
         WordData data = adjacencySets.getOrDefault(word, new WordData());;
         data.frequency++;
         adjacencySets.put(word, data);
@@ -46,7 +72,7 @@ public class WordsGraph {
 
     // Only from frequency is updated
     public void addPair(String from, String to) {
-        if (from == null) return;
+        if (from == null || from.equals("")) return;
         WordData fromData, toData;
 
         fromData = adjacencySets.getOrDefault(from, new WordData());
@@ -74,14 +100,72 @@ public class WordsGraph {
         adjacencySets.put(from, fromData);
     }
 
+    public void addSentence(String sentence) {
+        addSentence(sentence, DEFAULT_WORD_DELIMITER);
+    }
+
     public void addSentence(String sentence, String delim) {
         String[] words = sentence.split(delim);
-        if (words.length < 1) return;
+        if (words.length == 0) return;
 
         for (int i = 0; i < words.length - 1; i++) {
             addPair(words[i], words[i + 1]);
         }
         addWord(words[words.length - 1]);
+    }
+
+    public List<Map.Entry<String, WordData>> getSortedList(Comparator<Map.Entry<String, WordData>> comparator) {
+        List<Map.Entry<String, WordData>> entries = new ArrayList<>(adjacencySets.entrySet());
+
+        entries.sort(comparator);
+        return entries;
+    }
+
+    public int getWordFreq(String s) {
+        if (!adjacencySets.containsKey(s)) {
+            return -1;
+        } else {
+            return adjacencySets.get(s).frequency;
+        }
+    }
+
+    public int getWordOutDegree(String s) {
+        if (!adjacencySets.containsKey(s)) {
+            return -1;
+        } else {
+            return adjacencySets.get(s).outDegree;
+        }
+    }
+
+    public int getWordInDegree(String s) {
+        if (!adjacencySets.containsKey(s)) {
+            return -1;
+        } else {
+            return adjacencySets.get(s).inDegree;
+        }
+    }
+
+    public static Comparator<Map.Entry<String, WordData>> compareByWordFrequency () {
+        return new Comparator<Map.Entry<String, WordData>>() {
+            @Override
+            public int compare(Map.Entry<String, WordData> w1, Map.Entry<String, WordData> w2) {
+                int diff = w2.getValue().frequency - w1.getValue().frequency;
+                if (diff != 0) {
+                    return diff;
+                } else {
+                    return w1.getKey().compareTo(w2.getKey());
+                }
+
+            }
+        };
+    }
+
+    public Integer getEdgeWeight(String from, String to) {
+        Edge e = new Edge(from, to);
+        if (!adjacencySets.containsKey(from) || !adjacencySets.containsKey(to)) return -1;
+
+        Map<Edge, Integer> edges = adjacencySets.get(from).weightedEdges;
+        return (edges.getOrDefault(e, -1));
     }
 
     public Map<String, WordData> getAdjacencySets() {
@@ -94,6 +178,22 @@ public class WordsGraph {
 
     public int getNumEdges() {
         return numEdges;
+    }
+
+    public List<Map.Entry<String, WordData>> getAllEntries() {
+        return new ArrayList<>(adjacencySets.entrySet());
+    }
+
+    public Map<Edge, Integer> getAllWeightedEdges() {
+        Map<Edge, Integer> output = new HashMap<>();
+        for(Map.Entry<String, WordData> entry : adjacencySets.entrySet()) {
+            Map<Edge, Integer> entryEdges = entry.getValue().weightedEdges;
+
+            for (Edge edge : entryEdges.keySet()) {
+                output.put(edge, entryEdges.get(edge));
+            }
+        }
+        return output;
     }
 
 
