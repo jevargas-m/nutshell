@@ -63,8 +63,8 @@ public class RakeAnalyzer implements TextAnalyzer {
             WordsGraph.WordData data = e.getValue();
             double freq = (double)data.frequency;
             int degree = e.getValue().inDegree + e.getValue().outDegree;
-            contentWordScores.put(word, (double) degree);
-            //contentWordScores.put(word, (double) degree * freq);
+            //contentWordScores.put(word, (double) degree);
+            contentWordScores.put(word, (double) degree * freq);
             //contentWordScores.put(word, (double) freq);
         }
     }

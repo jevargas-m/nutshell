@@ -216,5 +216,21 @@ public class WordsGraph {
         return output;
     }
 
+    public Map<String, Double> getRelativeFreqs() {
+        Map<String, Double> output = new HashMap<>();
+
+        int total = 0;
+        for (Map.Entry<String, WordData> e : adjacencySets.entrySet()) {
+            total += e.getValue().frequency;
+        }
+
+        for (Map.Entry<String, WordData> e : adjacencySets.entrySet()) {
+            Double relFreq = (double) e.getValue().frequency / total;
+            output.put(e.getKey(), relFreq);
+        }
+
+        return output;
+    }
+
 
 }
