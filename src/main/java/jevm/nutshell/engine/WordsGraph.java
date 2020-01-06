@@ -216,7 +216,7 @@ public class WordsGraph {
         return output;
     }
 
-    public Map<String, Double> getRelativeFreqs() {
+    public Map<String, Double> getWordRelativeFreqs() {
         Map<String, Double> output = new HashMap<>();
 
         int total = 0;

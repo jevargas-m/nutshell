@@ -55,25 +55,46 @@ public class RakeAnalyzer implements TextAnalyzer {
         regexSplit = sb.toString();
     }
 
-    private void calcScoresByRelativeDegree() {
+    private void calcScoresByRelativeDegree(String strategy) {
         List<Map.Entry<String, WordsGraph.WordData>> all = contentWordsGraph.getAllEntries();
+
+
+        Map<String, Double> relFreqs = contentWordsGraph.getWordRelativeFreqs();
 
         for(Map.Entry<String, WordsGraph.WordData> e : all) {
             String word = e.getKey();
             WordsGraph.WordData data = e.getValue();
-            double freq = (double)data.frequency;
-            int degree = e.getValue().inDegree + e.getValue().outDegree;
-            //contentWordScores.put(word, (double) degree);
-            contentWordScores.put(word, (double) degree * freq);
-            //contentWordScores.put(word, (double) freq);
+            double score = 0.0;
+            switch ( strategy ) {
+                case "RELATIVE_DEGREE" :
+                    score = (double) (data.weightedInDegree + data.weightedOutDegree) / relFreqs.get(word);
+                    break;
+
+                case "WEIGHTED_DEGREE" :
+                    score = (double) data.weightedInDegree + data.weightedOutDegree;
+                    break;
+
+                case "DEGREE" :
+                    score = (double) data.inDegree + data.outDegree;
+                    break;
+
+                case "FREQUENCY" :
+                    score = relFreqs.get(word);
+                    break;
+
+                case "ENTROPY" :
+                    score = relFreqs.get(word);
+                    score = - score * Math.log(score);
+                    break;
+            }
+            contentWordScores.put(word, score);
         }
     }
 
-
-
     @Override
-    public Map<String, Double> getKeyWords(int n) {
-        calcScoresByRelativeDegree();
+    public Map<String, Double> getKeywords(int n, String strategy) {
+
+        calcScoresByRelativeDegree(strategy);
         Map<String, Double> scoredCandidates = new HashMap<>();
         Set<String> setOfCandidates = new HashSet<>(candidates); // eliminate duplicates
         for(String candidate : setOfCandidates) {
@@ -95,11 +116,31 @@ public class RakeAnalyzer implements TextAnalyzer {
         return output;
     }
 
+    public Map<String, Double> getKeyWordsSingle(int n, String strategy) {
+        Map<String, Double> output = new HashMap<>();
+        Map<String, Double> scoredCandidates = new HashMap<>();
+        calcScoresByRelativeDegree(strategy);
+        for (Map.Entry<String, WordsGraph.WordData> e : contentWordsGraph.getAllEntries()) {
+            String word = e.getKey();
+            scoredCandidates.put(word, contentWordScores.get(word));
+        }
+
+        List<Map.Entry<String, Double>> allScores = new ArrayList<>(scoredCandidates.entrySet());
+        allScores.sort(compareByScore());
+
+        for(int i = 0; i < n; i++) {
+            output.put(allScores.get(i).getKey(), allScores.get(i).getValue());
+        }
+
+        return output;
+    }
+
+
     public static Comparator<Map.Entry<String, Double>> compareByScore () {
         return new Comparator<Map.Entry<String, Double>>() {
             @Override
             public int compare(Map.Entry<String, Double> w1, Map.Entry<String, Double> w2) {
-                double diff = w2.getValue() - w1.getValue();
+                double diff = (w2.getValue() - w1.getValue()) * 1000000;
                 return (int) diff;
             }
         };
