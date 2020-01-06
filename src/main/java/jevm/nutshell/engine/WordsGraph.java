@@ -29,6 +29,16 @@ public class WordsGraph {
         }
     }
 
+    public void addAll(Collection<String> collection, String delim) {
+        for(String sentence : collection) {
+            addSentence(sentence, delim);
+        }
+    }
+
+    public void addAll(Collection<String> collection) {
+        addAll(collection, DEFAULT_WORD_DELIMITER);
+    }
+
 
     public class WordData {
         Map<Edge, Integer> weightedEdges = new HashMap<>(); // Weighted Edge
@@ -96,7 +106,7 @@ public class WordsGraph {
             fromData.weightedEdges.put(newEdge, 1); //add new edge to set
         }
 
-        if (to != null) {
+        if (to != null && !to.equals("")) {
             adjacencySets.put(to, toData);
         }
 
