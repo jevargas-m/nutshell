@@ -30,6 +30,7 @@ public class RakeAnalyzer implements TextAnalyzer {
             for (String sentence : sentences) {
                 sentence = sentence.trim();
                 sentence = sentence.replace('-', ' ');  // split composed words
+                sentence = sentence.replaceAll("^[^a-zA-Z]+|[^a-zA-Z]+$", "");  // trim non char from beginning and end
                 if (sentence.length() >= DEFAULT_MIN_LENGTH ) {
                     candidates.add(sentence);
                 }
@@ -57,17 +58,14 @@ public class RakeAnalyzer implements TextAnalyzer {
     private void calcScoresByRelativeDegree() {
         List<Map.Entry<String, WordsGraph.WordData>> all = contentWordsGraph.getAllEntries();
 
-        int totalWords = 0;
-        for(Map.Entry<String, WordsGraph.WordData> e : all) {
-            totalWords += e.getValue().frequency;
-        }
-
         for(Map.Entry<String, WordsGraph.WordData> e : all) {
             String word = e.getKey();
             WordsGraph.WordData data = e.getValue();
-            double freq = (double)data.frequency / (double) totalWords;
+            double freq = (double)data.frequency;
             int degree = e.getValue().inDegree + e.getValue().outDegree;
-            contentWordScores.put(word, degree / freq);
+            contentWordScores.put(word, (double) degree);
+            //contentWordScores.put(word, (double) degree * freq);
+            //contentWordScores.put(word, (double) freq);
         }
     }
 
@@ -83,7 +81,7 @@ public class RakeAnalyzer implements TextAnalyzer {
             for (String word : candidate.split(DEFAULT_WORD_DELIMITER)) {
                 candidateScore += contentWordScores.getOrDefault(word, 0.0);
             }
-            scoredCandidates.put(candidate, candidateScore);
+            scoredCandidates.put(candidate, candidateScore / candidate.split(" ").length);
         }
 
         List<Map.Entry<String, Double>> allScores = new ArrayList<>(scoredCandidates.entrySet());

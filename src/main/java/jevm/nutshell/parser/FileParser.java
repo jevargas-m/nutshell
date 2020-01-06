@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 public class FileParser implements Parser {
 
-    public static String SENTENCE_DELIMITERS = "[.,();`\":?!\\n]";
+    public static String SENTENCE_DELIMITERS = "[.,();`\":?!]";
 
     private Scanner scanner;
 

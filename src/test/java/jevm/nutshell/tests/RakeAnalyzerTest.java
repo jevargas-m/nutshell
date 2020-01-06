@@ -30,11 +30,11 @@ class RakeAnalyzerTest {
         StopWordsFileReader r = new StopWordsFileReader(f1);
         RakeAnalyzer analyzer = new RakeAnalyzer(r);
 
-        File f2 = new File ("res/alice.txt");
+        File f2 = new File ("res/mobydick.txt");
         FileParser fp = new FileParser(f2);
         analyzer.addText(fp);
 
-        Map<String, Double> keywords = analyzer.getKeyWords(200);
+        Map<String, Double> keywords = analyzer.getKeyWords(100);
         for(String keyword : keywords.keySet()) {
             System.out.println(keyword + " " + keywords.get(keyword));
         }

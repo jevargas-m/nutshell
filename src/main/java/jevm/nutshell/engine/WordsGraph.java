@@ -9,6 +9,7 @@ public class WordsGraph {
 
     protected Map<String, WordData> adjacencySets;
     protected int numEdges = 0;
+    protected int numWeightedEdges = 0;
 
     public WordsGraph() {
         adjacencySets = new HashMap<>();
@@ -45,6 +46,8 @@ public class WordsGraph {
         int frequency = 0;
         int inDegree = 0;
         int outDegree = 0;
+        int weightedInDegree = 0;
+        int weightedOutDegree = 0;
     }
 
     public class Edge {
@@ -86,30 +89,34 @@ public class WordsGraph {
     // Only from frequency is updated
     public void addEdge(String from, String to) {
         if (from == null || from.equals("")) return;
-        WordData fromData, toData;
 
-        fromData = adjacencySets.getOrDefault(from, new WordData());
-        toData = adjacencySets.getOrDefault(to, new WordData());
+        WordData fromData = adjacencySets.getOrDefault(from, new WordData());
+        WordData toData = adjacencySets.getOrDefault(to, new WordData());
 
-        fromData.frequency++;
         Edge newEdge = new Edge(from, to);
 
         if (fromData.weightedEdges.containsKey(newEdge)) {
             Integer frequency = fromData.weightedEdges.get(newEdge);
             frequency++;  // update edge weight
             fromData.weightedEdges.put(newEdge, frequency);
-        } else {
+            fromData.weightedInDegree++;
+            toData.weightedOutDegree++;
+            numWeightedEdges++;
+            adjacencySets.put(to, toData);
+
+        } else if (to != null && !to.equals("")){
             // if edge is new, update degrees and add to set
+            fromData.weightedInDegree++;
+            toData.weightedOutDegree++;
             fromData.outDegree++;
             toData.inDegree++;
             numEdges++;
+            numWeightedEdges++;
             fromData.weightedEdges.put(newEdge, 1); //add new edge to set
-        }
-
-        if (to != null && !to.equals("")) {
             adjacencySets.put(to, toData);
         }
 
+        fromData.frequency++; // freq only updated in from to avoid double counting
         adjacencySets.put(from, fromData);
     }
 
