@@ -24,15 +24,19 @@ public class WordsGraph {
         addAll(wordParser, wordDelimiter);
     }
 
+    public void addAll(WordParser wordParser) {
+        addAll(wordParser, DEFAULT_WORD_DELIMITER);
+    }
+
     public void addAll(WordParser wordParser, String wordDelimiter) {
         while (wordParser.hasNext()) {
             addSentence(wordParser.nextLine(), wordDelimiter);
         }
     }
 
-    public void addAll(Collection<String> collection, String delim) {
+    public void addAll(Collection<String> collection, String wordDelimiter) {
         for(String sentence : collection) {
-            addSentence(sentence, delim);
+            addSentence(sentence, wordDelimiter);
         }
     }
 

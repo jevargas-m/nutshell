@@ -25,6 +25,11 @@ public class RakeAnalyzer implements TextAnalyzer {
     }
 
     public void addCorpus(WordParser parser) {
+        if (corpusGraph == null) {
+            corpusGraph = new WordsGraph();
+        }
+
+        corpusGraph.
 
 
     }
