@@ -8,6 +8,7 @@ public class RakeAnalyzer implements TextAnalyzer {
 
 
     public static final String DEFAULT_WORD_DELIMITER = "\\s";
+    public static double UNKNOWN_SCORE_FACTOR = 1.3;
 
     private List<String> candidates;
     private List<String> stopWords;
@@ -35,6 +36,11 @@ public class RakeAnalyzer implements TextAnalyzer {
         textGraph.addAll(candidates);
     }
 
+    public void resetText() {
+        candidates = new LinkedList<>();
+        textGraph = new WordsGraph();
+    }
+
     private void buildRegexSplit() {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
@@ -56,36 +62,63 @@ public class RakeAnalyzer implements TextAnalyzer {
     }
 
     private void buidTextWordScores(String strategy) {
-        if (corpusWordScores == null) {
+        if (corpusGraph == null) {
             /* if corpus is not existent score as single text, otherwise is a relative scoring */
             textWordScores = calculateWordScores(textGraph, strategy);
         } else {
-            /* score known words relative to corpus*/
-            Map<String, Double> known = new HashMap<>();
+            buidCorpusWordScores(strategy);
+            textWordScores = new HashMap<>();
+            /* relative scoring vs corpus */
+            List<String> unknownWords = new LinkedList<>();
+            Map<String, Double> relFreqs = textGraph.getWordRelativeFreqs();
             for(Map.Entry<String, WordsGraph.WordData> e : textGraph.getAllEntries()) {
                 String word = e.getKey();
                 WordsGraph.WordData data = e.getValue();
+                if (corpusWordScores.containsKey(word) && corpusWordScores.get(word) != 0.0) {
+                    double thisWordScore = calcScore(strategy, data, relFreqs.get(word), true);
+                    if (!strategy.equals("ENTROPY")) {
+                        double corpusScore = corpusWordScores.get(word);
+                        if (corpusScore > Double.MIN_VALUE) {
+                            textWordScores.put(word, thisWordScore / corpusScore);
+                        }
 
+                    } else {
+                        /* entropy is additive */
+                        double currentEntropy = textWordScores.getOrDefault(word, 0.0);
+                        currentEntropy += thisWordScore;
+                        textWordScores.put(word, currentEntropy);
+                    }
+                } else {
+                    unknownWords.add(word);
+                }
+            }
 
+            /* normalize unknown words */
+            double min = Double.POSITIVE_INFINITY;
+            double max = Double.NEGATIVE_INFINITY;
+            for(Double score : textWordScores.values()) {
+                if (score > max) max = score;
+                if (score < min) min = score;
+            }
+            double scoreUnkown = min + (max - min) * UNKNOWN_SCORE_FACTOR;
+            for (String w : unknownWords) {
+                textWordScores.put(w, scoreUnkown * textGraph.getWordFreq(w));
             }
         }
-
-
     }
 
     private Map<String, Double> calculateWordScores(WordsGraph graph, String strategy) {
         Map<String, Double> output = new HashMap<>();
-        List<Map.Entry<String, WordsGraph.WordData>> all = graph.getAllEntries();
         Map<String, Double> relFreqs = graph.getWordRelativeFreqs();
-        for(Map.Entry<String, WordsGraph.WordData> e : all) {
+        for(Map.Entry<String, WordsGraph.WordData> e : graph.getAllEntries()) {
             String word = e.getKey();
             WordsGraph.WordData data = e.getValue();
-            output.put(word, calcScore(strategy, data, relFreqs.get(word)));
+            output.put(word, calcScore(strategy, data, relFreqs.get(word), false));
         }
         return output;
     }
 
-    private double calcScore(String strategy, WordsGraph.WordData data, double relFreq) {
+    private double calcScore(String strategy, WordsGraph.WordData data, double relFreq, boolean isCorpus) {
         double score = 0.0;
         switch ( strategy ) {
 
@@ -107,7 +140,8 @@ public class RakeAnalyzer implements TextAnalyzer {
 
             case "ENTROPY" :
                 score = relFreq;
-                score = - score * Math.log(score) * data.frequency;
+                score = - score * Math.log(score);
+                if (!isCorpus) score *= data.frequency;
                 break;
         }
         return score;
@@ -117,13 +151,11 @@ public class RakeAnalyzer implements TextAnalyzer {
     public Map<String, Double> getKeywords(int n, String strategy) {
 
         buidTextWordScores(strategy);
+
         Map<String, Double> scoredCandidates = new HashMap<>();
         Set<String> setOfCandidates = new HashSet<>(candidates); // eliminate duplicates
         for(String candidate : setOfCandidates) {
-            Double candidateScore = 0.0;
-            for (String word : candidate.split(DEFAULT_WORD_DELIMITER)) {
-                candidateScore += textWordScores.getOrDefault(word, 0.0);
-            }
+            double candidateScore = scoreSentence(candidate);
             scoredCandidates.put(candidate, candidateScore / candidate.split(" ").length);
         }
 
@@ -169,8 +201,12 @@ public class RakeAnalyzer implements TextAnalyzer {
     }
 
     @Override
-    public int scoreSentence(String sentence) {
-        return 0;
+    public double scoreSentence(String sentence) {
+        double score = 0.0;
+        for (String word : sentence.split(DEFAULT_WORD_DELIMITER)) {
+            score += textWordScores.getOrDefault(word, 0.0);
+        }
+        return score;
     }
 
     @Override

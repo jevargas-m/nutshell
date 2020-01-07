@@ -49,7 +49,6 @@ public class FileWordParser implements WordParser {
                 if (sentence.length() >= DEFAULT_MIN_LENGTH ) {
                     output.add(sentence);
                 }
-                output.add(sentence);
             }
         }
         return output;
