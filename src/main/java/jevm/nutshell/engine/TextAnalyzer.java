@@ -4,7 +4,7 @@ import jevm.nutshell.parser.WordParser;
 
 import java.util.*;
 
-public class RakeAnalyzer {
+public class TextAnalyzer {
 
 
     public static final String DEFAULT_WORD_DELIMITER = "\\s";
@@ -16,7 +16,7 @@ public class RakeAnalyzer {
     private Map<String, Double> textWordScores, corpusWordScores;
     private String regexSplit, strategy;
 
-    public RakeAnalyzer(StopWordsGenerator stopWordsGenerator, String strategy) {
+    public TextAnalyzer(StopWordsGenerator stopWordsGenerator, String strategy) {
         candidates = new LinkedList<>();
         stopWords = stopWordsGenerator.getStopWords();
         textGraph = new WordsGraph();
@@ -152,57 +152,42 @@ public class RakeAnalyzer {
         return score;
     }
 
-    public Queue<ScoredWord> getKeywords(int n) {
+    public List<ScoredWord> getKeywords(int n) {
 
         buidTextWordScores();
+        Queue<ScoredWord> scoredCandidates = new PriorityQueue<>();
 
-        Map<String, Double> scoredCandidates = new HashMap<>();
         Set<String> setOfCandidates = new HashSet<>(candidates); // eliminate duplicates
         for(String candidate : setOfCandidates) {
             double candidateScore = scoreSentence(candidate);
-            scoredCandidates.put(candidate, candidateScore / candidate.split(" ").length);
+            scoredCandidates.add(new ScoredWord(candidate, candidateScore));
         }
 
-        List<Map.Entry<String, Double>> allScores = new ArrayList<>(scoredCandidates.entrySet());
-        allScores.sort(compareByScore());
-
-        Queue<ScoredWord> output = new PriorityQueue<>();
+        List<ScoredWord> output = new ArrayList<>(n);
         for(int i = 0; i < n; i++) {
-            ScoredWord scoredWord = new ScoredWord(allScores.get(i).getKey(), allScores.get(i).getValue());
-            output.add(scoredWord);
+            if (!scoredCandidates.isEmpty()) {
+                output.add(scoredCandidates.remove());
+            }
         }
 
         return output;
     }
 
-    public Map<String, Double> getKeyWordsSingle(int n) {
-        Map<String, Double> output = new HashMap<>();
-        Map<String, Double> scoredCandidates = new HashMap<>();
+    public List<ScoredWord> getKeyWordsSingle(int n) {
+
+        Queue<ScoredWord> scoredCandidates = new PriorityQueue<>();
         buidTextWordScores();
         for (Map.Entry<String, WordsGraph.WordData> e : textGraph.getAllEntries()) {
             String word = e.getKey();
-            scoredCandidates.put(word, textWordScores.get(word));
+            scoredCandidates.add(new ScoredWord(word, textWordScores.get(word)));
         }
 
-        List<Map.Entry<String, Double>> allScores = new ArrayList<>(scoredCandidates.entrySet());
-        allScores.sort(compareByScore());
-
+        List<ScoredWord> output = new ArrayList<>(n);
         for(int i = 0; i < n; i++) {
-            output.put(allScores.get(i).getKey(), allScores.get(i).getValue());
+            output.add(scoredCandidates.remove());
         }
 
         return output;
-    }
-
-
-    public static Comparator<Map.Entry<String, Double>> compareByScore () {
-        return new Comparator<Map.Entry<String, Double>>() {
-            @Override
-            public int compare(Map.Entry<String, Double> w1, Map.Entry<String, Double> w2) {
-                double diff = (w2.getValue() - w1.getValue()) * 1000000;
-                return (int) diff;
-            }
-        };
     }
 
     public double scoreSentence(String sentence) {

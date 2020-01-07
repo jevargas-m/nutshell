@@ -1,6 +1,6 @@
 package jevm.nutshell.tests;
 
-import jevm.nutshell.engine.RakeAnalyzer;
+import jevm.nutshell.engine.TextAnalyzer;
 import jevm.nutshell.engine.ScoredWord;
 import jevm.nutshell.engine.StopWordsFileReader;
 import jevm.nutshell.parser.FileWordParser;
@@ -8,18 +8,15 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Map;
-import java.util.PriorityQueue;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
 
-class RakeAnalyzerTest {
+class TextAnalyzerTest {
 
     @Test
     void addParser() throws FileNotFoundException {
         File f1 = new File("res/stopwords_EN.txt");
         StopWordsFileReader r = new StopWordsFileReader(f1);
-        RakeAnalyzer analyzer = new RakeAnalyzer(r, "WEIGHTED_DEGREE");
+        TextAnalyzer analyzer = new TextAnalyzer(r, "WEIGHTED_DEGREE");
 
         File f2 = new File ("res/alice.txt");
         FileWordParser fp = new FileWordParser(f2);
@@ -30,13 +27,13 @@ class RakeAnalyzerTest {
     void getKeyWords() throws FileNotFoundException {
         File f1 = new File("res/stopwords_EN.txt");
         StopWordsFileReader r = new StopWordsFileReader(f1);
-        RakeAnalyzer analyzer = new RakeAnalyzer(r, "WEIGHTED_DEGREE");
+        TextAnalyzer analyzer = new TextAnalyzer(r, "WEIGHTED_DEGREE");
 
         File f2 = new File ("res/lord_rings.txt");
         FileWordParser fp = new FileWordParser(f2);
         analyzer.addText(fp);
 
-        Queue<ScoredWord> keywords = analyzer.getKeywords(20);
+        List<ScoredWord> keywords = analyzer.getKeywords(20);
         for(ScoredWord k : keywords) {
             System.out.println(k);
         }
@@ -46,30 +43,30 @@ class RakeAnalyzerTest {
     void testKeywordsSingle() throws FileNotFoundException {
         File f1 = new File("res/stopwords_EN.txt");
         StopWordsFileReader r = new StopWordsFileReader(f1);
-        RakeAnalyzer analyzer = new RakeAnalyzer(r, "ENTROPY");
+        TextAnalyzer analyzer = new TextAnalyzer(r, "WEIGHTED_DEGREE");
 
         File f2 = new File ("res/lord_rings.txt");
         FileWordParser fp = new FileWordParser(f2);
         analyzer.addText(fp);
 
-        Map<String, Double> keywords = analyzer.getKeyWordsSingle(10);
+        List<ScoredWord> keywords = analyzer.getKeyWordsSingle(100);
         System.out.println("--------------- ENTROPY -----------------------------------");
-        for(String keyword : keywords.keySet()) {
-            System.out.println(keyword + " " + keywords.get(keyword));
+        for(ScoredWord keyword : keywords) {
+            System.out.println(keyword);
         }
         System.out.println("-----------------------------------------------------------");
 
         keywords = analyzer.getKeyWordsSingle(10);
         System.out.println("--------------- WEIGHTED_DEGREE -----------------------------------");
-        for(String keyword : keywords.keySet()) {
-            System.out.println(keyword + " " + keywords.get(keyword));
+        for(ScoredWord keyword : keywords) {
+            System.out.println(keyword);
         }
         System.out.println("-----------------------------------------------------------");
 
         keywords = analyzer.getKeyWordsSingle(10);
         System.out.println("--------------- DEGREE -----------------------------------");
-        for(String keyword : keywords.keySet()) {
-            System.out.println(keyword + " " + keywords.get(keyword));
+        for(ScoredWord keyword : keywords) {
+            System.out.println(keyword);
         }
         System.out.println("-----------------------------------------------------------");
     }
@@ -78,7 +75,7 @@ class RakeAnalyzerTest {
     void testCorpus1() throws FileNotFoundException {
         File f1 = new File("res/stopwords_EN.txt");
         StopWordsFileReader r = new StopWordsFileReader(f1);
-        RakeAnalyzer analyzer = new RakeAnalyzer(r, "RELATIVE_DEGREE");
+        TextAnalyzer analyzer = new TextAnalyzer(r, "RELATIVE_DEGREE");
 
         FileWordParser fp1 = new FileWordParser(new File ("res/lord_rings.txt"));
         analyzer.addCorpus(fp1);
@@ -86,7 +83,7 @@ class RakeAnalyzerTest {
         FileWordParser fp1_1 = new FileWordParser(new File ("res/lord_rings_6.txt"));
         analyzer.addText(fp1_1);
 
-        Queue<ScoredWord> keywords = analyzer.getKeywords(500);
+        List<ScoredWord> keywords = analyzer.getKeywords(500);
         System.out.println("--------------- WEIGHTED_DEGREE -----------------------------------");
         for(ScoredWord keyword : keywords) {
             System.out.println(keyword);
@@ -112,7 +109,7 @@ class RakeAnalyzerTest {
     void testCorpus2() throws FileNotFoundException {
         File f1 = new File("res/stopwords_EN.txt");
         StopWordsFileReader r = new StopWordsFileReader(f1);
-        RakeAnalyzer analyzer = new RakeAnalyzer(r, "ENTROPY");
+        TextAnalyzer analyzer = new TextAnalyzer(r, "ENTROPY");
 
         FileWordParser fp1 = new FileWordParser(new File ("res/lord_rings.txt"));
         analyzer.addCorpus(fp1);
@@ -120,10 +117,10 @@ class RakeAnalyzerTest {
         FileWordParser fp1_1 = new FileWordParser(new File ("res/lord_rings_6.txt"));
         analyzer.addText(fp1_1);
 
-        Map<String, Double> keywords = analyzer.getKeyWordsSingle(20);
+        List<ScoredWord> keywords = analyzer.getKeyWordsSingle(20);
         System.out.println("--------------- \"ENTROPY\" -----------------------------------");
-        for(String keyword : keywords.keySet()) {
-            System.out.println(keyword + " " + keywords.get(keyword));
+        for(ScoredWord keyword : keywords) {
+            System.out.println(keyword);
         }
         System.out.println("-----------------------------------------------------------");
 
@@ -133,8 +130,8 @@ class RakeAnalyzerTest {
 
         keywords = analyzer.getKeyWordsSingle(20);
         System.out.println("--------------- \"ENTROPY\" -----------------------------------");
-        for(String keyword : keywords.keySet()) {
-            System.out.println(keyword + " " + keywords.get(keyword));
+        for(ScoredWord keyword : keywords) {
+            System.out.println(keyword);
         }
         System.out.println("-----------------------------------------------------------");
     }
@@ -143,9 +140,9 @@ class RakeAnalyzerTest {
     void createAbstractTest() throws FileNotFoundException {
         File f1 = new File("res/stopwords_EN.txt");
         StopWordsFileReader r = new StopWordsFileReader(f1);
-        RakeAnalyzer analyzer = new RakeAnalyzer(r, "WEIGHTED_DEGREE");
+        TextAnalyzer analyzer = new TextAnalyzer(r, "WEIGHTED_DEGREE");
 
-        File f2 = new File ("res/lord_rings.txt");
+        File f2 = new File ("res/mobydick.txt");
         FileWordParser fp = new FileWordParser(f2);
         analyzer.addText(fp);
         analyzer.analize();

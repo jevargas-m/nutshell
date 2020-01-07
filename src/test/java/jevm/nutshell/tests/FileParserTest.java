@@ -15,22 +15,22 @@ class FileParserTest {
         FileWordParser fp = new FileWordParser(f);
 
         String s = fp.nextLine();
-        assertEquals("alice looked at the jury box", s);
+        assertEquals("alice looked at the jury box", s.toLowerCase());
 
         s = fp.nextLine();
-        assertEquals("and saw that", s);
+        assertEquals("and saw that", s.toLowerCase());
 
         s = fp.nextLine();
-        assertEquals("in her haste", s);
+        assertEquals("in her haste", s.toLowerCase());
 
         s = fp.nextLine();
-        assertEquals("she had put the lizard in", s);
+        assertEquals("she had put the lizard in", s.toLowerCase());
 
         s = fp.nextLine();
-        assertEquals("head downwards", s);
+        assertEquals("head downwards", s.toLowerCase());
 
         s = fp.nextLine();
-        assertEquals("and the poor little thing was waving its tail about in a melancholy way", s);
+        assertEquals("and the poor little thing was waving its tail about in a melancholy way", s.toLowerCase());
     }
 
 }
