@@ -1,6 +1,6 @@
 package jevm.nutshell.tests;
 
-import jevm.nutshell.parser.FileParser;
+import jevm.nutshell.parser.FileWordParser;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -12,7 +12,7 @@ class FileParserTest {
     @Test
     void testFileRead() throws FileNotFoundException {
         File f = new File ("res/text_test1.txt");
-        FileParser fp = new FileParser(f);
+        FileWordParser fp = new FileWordParser(f);
 
         String s = fp.nextLine();
         assertEquals("alice looked at the jury box", s);

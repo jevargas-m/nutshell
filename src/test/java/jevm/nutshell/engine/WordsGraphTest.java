@@ -1,6 +1,6 @@
 package jevm.nutshell.engine;
 
-import jevm.nutshell.parser.FileParser;
+import jevm.nutshell.parser.FileWordParser;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -15,7 +15,7 @@ class WordsGraphTest {
     @Test
     void testGraphConstruction1() throws FileNotFoundException {
         File f = new File ("res/text_test2.txt");
-        FileParser fp = new FileParser(f);
+        FileWordParser fp = new FileWordParser(f);
         WordsGraph graph = new WordsGraph();
 
         while (fp.hasNext()) {
@@ -49,7 +49,7 @@ class WordsGraphTest {
     @Test
     void testGraphConstruction2() throws FileNotFoundException {
         File f = new File ("res/alice.txt");
-        FileParser fp = new FileParser(f);
+        FileWordParser fp = new FileWordParser(f);
         WordsGraph graph = new WordsGraph();
 
         while (fp.hasNext()) {
@@ -106,7 +106,7 @@ class WordsGraphTest {
     @Test
     void testAliceTopFreqs() throws FileNotFoundException {
         File f = new File ("res/alice.txt");
-        WordsGraph graph = new WordsGraph(new FileParser(f));
+        WordsGraph graph = new WordsGraph(new FileWordParser(f));
 
         List<Map.Entry<String, WordsGraph.WordData>> l = graph.getSortedList(WordsGraph.compareByWordFrequency());
         for (int i = 0; i < 100; i++){

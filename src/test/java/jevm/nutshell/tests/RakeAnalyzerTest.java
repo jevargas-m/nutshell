@@ -2,7 +2,7 @@ package jevm.nutshell.tests;
 
 import jevm.nutshell.engine.RakeAnalyzer;
 import jevm.nutshell.engine.StopWordsFileReader;
-import jevm.nutshell.parser.FileParser;
+import jevm.nutshell.parser.FileWordParser;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -18,7 +18,7 @@ class RakeAnalyzerTest {
         RakeAnalyzer analyzer = new RakeAnalyzer(r);
 
         File f2 = new File ("res/alice.txt");
-        FileParser fp = new FileParser(f2);
+        FileWordParser fp = new FileWordParser(f2);
         analyzer.addText(fp);
     }
 
@@ -28,8 +28,8 @@ class RakeAnalyzerTest {
         StopWordsFileReader r = new StopWordsFileReader(f1);
         RakeAnalyzer analyzer = new RakeAnalyzer(r);
 
-        File f2 = new File ("res/mobydick.txt");
-        FileParser fp = new FileParser(f2);
+        File f2 = new File ("res/alice.txt");
+        FileWordParser fp = new FileWordParser(f2);
         analyzer.addText(fp);
 
         Map<String, Double> keywords = analyzer.getKeywords(100, "ENTROPY");
@@ -44,8 +44,8 @@ class RakeAnalyzerTest {
         StopWordsFileReader r = new StopWordsFileReader(f1);
         RakeAnalyzer analyzer = new RakeAnalyzer(r);
 
-        File f2 = new File ("res/mobydick.txt");
-        FileParser fp = new FileParser(f2);
+        File f2 = new File ("res/alice.txt");
+        FileWordParser fp = new FileWordParser(f2);
         analyzer.addText(fp);
 
         Map<String, Double> keywords = analyzer.getKeyWordsSingle(10, "ENTROPY");

@@ -1,6 +1,6 @@
 package jevm.nutshell.engine;
 
-import jevm.nutshell.parser.Parser;
+import jevm.nutshell.parser.WordParser;
 
 import java.util.*;
 
@@ -15,18 +15,18 @@ public class WordsGraph {
         adjacencySets = new HashMap<>();
     }
 
-    public WordsGraph(Parser parser) {
-        this(parser, DEFAULT_WORD_DELIMITER);
+    public WordsGraph(WordParser wordParser) {
+        this(wordParser, DEFAULT_WORD_DELIMITER);
     }
 
-    public WordsGraph(Parser parser, String wordDelimiter) {
+    public WordsGraph(WordParser wordParser, String wordDelimiter) {
         this();
-        addAll(parser, wordDelimiter);
+        addAll(wordParser, wordDelimiter);
     }
 
-    public void addAll(Parser parser, String wordDelimiter) {
-        while (parser.hasNext()) {
-            addSentence(parser.nextLine(), wordDelimiter);
+    public void addAll(WordParser wordParser, String wordDelimiter) {
+        while (wordParser.hasNext()) {
+            addSentence(wordParser.nextLine(), wordDelimiter);
         }
     }
 

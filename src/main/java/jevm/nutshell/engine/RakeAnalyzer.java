@@ -1,42 +1,38 @@
 package jevm.nutshell.engine;
 
-import jevm.nutshell.parser.Parser;
+import jevm.nutshell.parser.WordParser;
 
 import java.util.*;
 
 public class RakeAnalyzer implements TextAnalyzer {
 
-    public static int DEFAULT_MIN_LENGTH = 2;
+
     public static final String DEFAULT_WORD_DELIMITER = "\\s";
 
     private List<String> candidates;
     private List<String> stopWords;
-    private WordsGraph contentWordsGraph;
+    private WordsGraph textGraph, corpusGraph;
     private Map<String, Double> contentWordScores;
     private String regexSplit;
 
     public RakeAnalyzer(StopWordsGenerator stopWordsGenerator) {
         candidates = new LinkedList<>();
         stopWords = stopWordsGenerator.getStopWords();
-        contentWordsGraph = new WordsGraph();
+        textGraph = new WordsGraph();
+        corpusGraph = null;
         contentWordScores = new HashMap<>();
         buildRegexSplit();
     }
 
-    public void addText(Parser parser) {
-        while (parser.hasNext()) {
-            String line = parser.nextLine();
-            String[] sentences = line.split(regexSplit);
-            for (String sentence : sentences) {
-                sentence = sentence.trim();
-                sentence = sentence.replace('-', ' ');  // split composed words
-                sentence = sentence.replaceAll("^[^a-zA-Z]+|[^a-zA-Z]+$", "");  // trim non char from beginning and end
-                if (sentence.length() >= DEFAULT_MIN_LENGTH ) {
-                    candidates.add(sentence);
-                }
-            }
-        }
-        contentWordsGraph.addAll(candidates);
+    public void addCorpus(WordParser parser) {
+
+
+    }
+
+
+    public void addText(WordParser wordParser) {
+        candidates = wordParser.getListOfSentences(regexSplit);
+        textGraph.addAll(candidates);
     }
 
     private void buildRegexSplit() {
@@ -55,11 +51,11 @@ public class RakeAnalyzer implements TextAnalyzer {
         regexSplit = sb.toString();
     }
 
-    private void calcScoresByRelativeDegree(String strategy) {
-        List<Map.Entry<String, WordsGraph.WordData>> all = contentWordsGraph.getAllEntries();
+    private void calculateWordScores(String strategy) {
+        List<Map.Entry<String, WordsGraph.WordData>> all = textGraph.getAllEntries();
 
 
-        Map<String, Double> relFreqs = contentWordsGraph.getWordRelativeFreqs();
+        Map<String, Double> relFreqs = textGraph.getWordRelativeFreqs();
 
         for(Map.Entry<String, WordsGraph.WordData> e : all) {
             String word = e.getKey();
@@ -84,7 +80,7 @@ public class RakeAnalyzer implements TextAnalyzer {
 
                 case "ENTROPY" :
                     score = relFreqs.get(word);
-                    score = - score * Math.log(score);
+                    score = - score * Math.log(score) * data.frequency;
                     break;
             }
             contentWordScores.put(word, score);
@@ -94,7 +90,7 @@ public class RakeAnalyzer implements TextAnalyzer {
     @Override
     public Map<String, Double> getKeywords(int n, String strategy) {
 
-        calcScoresByRelativeDegree(strategy);
+        calculateWordScores(strategy);
         Map<String, Double> scoredCandidates = new HashMap<>();
         Set<String> setOfCandidates = new HashSet<>(candidates); // eliminate duplicates
         for(String candidate : setOfCandidates) {
@@ -119,8 +115,8 @@ public class RakeAnalyzer implements TextAnalyzer {
     public Map<String, Double> getKeyWordsSingle(int n, String strategy) {
         Map<String, Double> output = new HashMap<>();
         Map<String, Double> scoredCandidates = new HashMap<>();
-        calcScoresByRelativeDegree(strategy);
-        for (Map.Entry<String, WordsGraph.WordData> e : contentWordsGraph.getAllEntries()) {
+        calculateWordScores(strategy);
+        for (Map.Entry<String, WordsGraph.WordData> e : textGraph.getAllEntries()) {
             String word = e.getKey();
             scoredCandidates.put(word, contentWordScores.get(word));
         }
