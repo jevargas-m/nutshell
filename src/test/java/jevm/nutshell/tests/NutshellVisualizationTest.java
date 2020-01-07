@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class NutshellVisualizationTest {
 
     @Test
-    void testCreateVisualization() throws FileNotFoundException {
+    void testCreateVisualization1() throws FileNotFoundException {
         File f1 = new File("res/stopwords_EN.txt");
         StopWordsFileReader r = new StopWordsFileReader(f1);
         TextAnalyzer analyzer = new TextAnalyzer(r, "WEIGHTED_DEGREE");
@@ -25,7 +25,23 @@ class NutshellVisualizationTest {
         FileWordParser fp = new FileWordParser(f2);
         analyzer.addText(fp);
 
-        List<ScoredWord> keywords = analyzer.getKeyWordsSingle(100);
+        List<ScoredWord> keywords = analyzer.getKeyWordsSingle(200);
+
+        NutshellVisualization v = new NutshellVisualization(keywords);
+        v.createJSONFile();
+    }
+
+    @Test
+    void testCreateVisualization2() throws FileNotFoundException {
+        File f1 = new File("res/stopwords_EN.txt");
+        StopWordsFileReader r = new StopWordsFileReader(f1);
+        TextAnalyzer analyzer = new TextAnalyzer(r, "WEIGHTED_DEGREE");
+
+        File f2 = new File ("res/lord_rings.txt");
+        FileWordParser fp = new FileWordParser(f2);
+        analyzer.addText(fp);
+
+        List<ScoredWord> keywords = analyzer.getKeyWordsSingle(200);
 
         NutshellVisualization v = new NutshellVisualization(keywords);
         v.createJSONFile();

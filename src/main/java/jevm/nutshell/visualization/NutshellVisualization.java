@@ -16,7 +16,7 @@ public class NutshellVisualization {
 
     public int MAX_VALUE = 100;
     public int MIN_VALUE = 10;
-    public String OUTPUT_FILENAME = "nutshell.htm";
+    public String OUTPUT_FILENAME = "gword.js";
 
     private List<ScoredWord> data;
     private Map<String, Integer> normalizedData;
