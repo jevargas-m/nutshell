@@ -28,7 +28,7 @@ public class RakeAnalyzer implements TextAnalyzer {
         if (corpusGraph == null) {
             corpusGraph = new WordsGraph();
         }
-        corpusGraph.addAll(parser);
+        corpusGraph.addAll(parser.getListOfSentences(regexSplit));
     }
 
     public void addText(WordParser wordParser) {
