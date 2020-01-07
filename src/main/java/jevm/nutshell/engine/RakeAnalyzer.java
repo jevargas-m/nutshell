@@ -59,6 +59,15 @@ public class RakeAnalyzer implements TextAnalyzer {
         if (corpusWordScores == null) {
             /* if corpus is not existent score as single text, otherwise is a relative scoring */
             textWordScores = calculateWordScores(textGraph, strategy);
+        } else {
+            /* score known words relative to corpus*/
+            Map<String, Double> known = new HashMap<>();
+            for(Map.Entry<String, WordsGraph.WordData> e : textGraph.getAllEntries()) {
+                String word = e.getKey();
+                WordsGraph.WordData data = e.getValue();
+
+
+            }
         }
 
 
@@ -71,32 +80,37 @@ public class RakeAnalyzer implements TextAnalyzer {
         for(Map.Entry<String, WordsGraph.WordData> e : all) {
             String word = e.getKey();
             WordsGraph.WordData data = e.getValue();
-            double score = 0.0;
-            switch ( strategy ) {
-                case "RELATIVE_DEGREE" :
-                    score = (double) (data.weightedInDegree + data.weightedOutDegree) / relFreqs.get(word);
-                    break;
-
-                case "WEIGHTED_DEGREE" :
-                    score = (double) data.weightedInDegree + data.weightedOutDegree;
-                    break;
-
-                case "DEGREE" :
-                    score = (double) data.inDegree + data.outDegree;
-                    break;
-
-                case "FREQUENCY" :
-                    score = relFreqs.get(word);
-                    break;
-
-                case "ENTROPY" :
-                    score = relFreqs.get(word);
-                    score = - score * Math.log(score) * data.frequency;
-                    break;
-            }
-            output.put(word, score);
+            output.put(word, calcScore(strategy, data, relFreqs.get(word)));
         }
         return output;
+    }
+
+    private double calcScore(String strategy, WordsGraph.WordData data, double relFreq) {
+        double score = 0.0;
+        switch ( strategy ) {
+
+            case "RELATIVE_DEGREE" :
+                score = (double) (data.weightedInDegree + data.weightedOutDegree) / relFreq;
+                break;
+
+            case "WEIGHTED_DEGREE" :
+                score = (double) data.weightedInDegree + data.weightedOutDegree;
+                break;
+
+            case "DEGREE" :
+                score = (double) data.inDegree + data.outDegree;
+                break;
+
+            case "FREQUENCY" :
+                score = relFreq;
+                break;
+
+            case "ENTROPY" :
+                score = relFreq;
+                score = - score * Math.log(score) * data.frequency;
+                break;
+        }
+        return score;
     }
 
     @Override
