@@ -4,7 +4,7 @@ import jevm.nutshell.parser.WordParser;
 
 import java.util.*;
 
-public class RakeAnalyzer implements TextAnalyzer {
+public class RakeAnalyzer {
 
 
     public static final String DEFAULT_WORD_DELIMITER = "\\s";
@@ -14,13 +14,14 @@ public class RakeAnalyzer implements TextAnalyzer {
     private List<String> stopWords;
     private WordsGraph textGraph, corpusGraph;
     private Map<String, Double> textWordScores, corpusWordScores;
-    private String regexSplit;
+    private String regexSplit, strategy;
 
-    public RakeAnalyzer(StopWordsGenerator stopWordsGenerator) {
+    public RakeAnalyzer(StopWordsGenerator stopWordsGenerator, String strategy) {
         candidates = new LinkedList<>();
         stopWords = stopWordsGenerator.getStopWords();
         textGraph = new WordsGraph();
         corpusGraph = null;
+        this.strategy = strategy;
         buildRegexSplit();
     }
 
@@ -41,6 +42,10 @@ public class RakeAnalyzer implements TextAnalyzer {
         textGraph = new WordsGraph();
     }
 
+    public void analize() {
+        buidTextWordScores();
+    }
+
     private void buildRegexSplit() {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
@@ -57,16 +62,16 @@ public class RakeAnalyzer implements TextAnalyzer {
         regexSplit = sb.toString();
     }
 
-    private void buidCorpusWordScores(String strategy) {
-        corpusWordScores = calculateWordScores(corpusGraph, strategy);
+    private void buidCorpusWordScores() {
+        corpusWordScores = calculateWordScores(corpusGraph);
     }
 
-    private void buidTextWordScores(String strategy) {
+    private void buidTextWordScores() {
         if (corpusGraph == null) {
             /* if corpus is not existent score as single text, otherwise is a relative scoring */
-            textWordScores = calculateWordScores(textGraph, strategy);
+            textWordScores = calculateWordScores(textGraph);
         } else {
-            buidCorpusWordScores(strategy);
+            buidCorpusWordScores();
             textWordScores = new HashMap<>();
             /* relative scoring vs corpus */
             List<String> unknownWords = new LinkedList<>();
@@ -107,7 +112,7 @@ public class RakeAnalyzer implements TextAnalyzer {
         }
     }
 
-    private Map<String, Double> calculateWordScores(WordsGraph graph, String strategy) {
+    private Map<String, Double> calculateWordScores(WordsGraph graph) {
         Map<String, Double> output = new HashMap<>();
         Map<String, Double> relFreqs = graph.getWordRelativeFreqs();
         for(Map.Entry<String, WordsGraph.WordData> e : graph.getAllEntries()) {
@@ -147,10 +152,9 @@ public class RakeAnalyzer implements TextAnalyzer {
         return score;
     }
 
-    @Override
-    public Map<String, Double> getKeywords(int n, String strategy) {
+    public Queue<ScoredWord> getKeywords(int n) {
 
-        buidTextWordScores(strategy);
+        buidTextWordScores();
 
         Map<String, Double> scoredCandidates = new HashMap<>();
         Set<String> setOfCandidates = new HashSet<>(candidates); // eliminate duplicates
@@ -162,18 +166,19 @@ public class RakeAnalyzer implements TextAnalyzer {
         List<Map.Entry<String, Double>> allScores = new ArrayList<>(scoredCandidates.entrySet());
         allScores.sort(compareByScore());
 
-        Map<String, Double> output = new HashMap<>();
+        Queue<ScoredWord> output = new PriorityQueue<>();
         for(int i = 0; i < n; i++) {
-            output.put(allScores.get(i).getKey(), allScores.get(i).getValue());
+            ScoredWord scoredWord = new ScoredWord(allScores.get(i).getKey(), allScores.get(i).getValue());
+            output.add(scoredWord);
         }
 
         return output;
     }
 
-    public Map<String, Double> getKeyWordsSingle(int n, String strategy) {
+    public Map<String, Double> getKeyWordsSingle(int n) {
         Map<String, Double> output = new HashMap<>();
         Map<String, Double> scoredCandidates = new HashMap<>();
-        buidTextWordScores(strategy);
+        buidTextWordScores();
         for (Map.Entry<String, WordsGraph.WordData> e : textGraph.getAllEntries()) {
             String word = e.getKey();
             scoredCandidates.put(word, textWordScores.get(word));
@@ -200,8 +205,8 @@ public class RakeAnalyzer implements TextAnalyzer {
         };
     }
 
-    @Override
     public double scoreSentence(String sentence) {
+        sentence = sentence.toLowerCase();
         double score = 0.0;
         for (String word : sentence.split(DEFAULT_WORD_DELIMITER)) {
             score += textWordScores.getOrDefault(word, 0.0);
@@ -209,7 +214,6 @@ public class RakeAnalyzer implements TextAnalyzer {
         return score;
     }
 
-    @Override
     public int scoreWord(String word) {
         return 0;
     }

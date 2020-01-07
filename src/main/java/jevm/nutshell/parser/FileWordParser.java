@@ -2,9 +2,7 @@ package jevm.nutshell.parser;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class FileWordParser implements WordParser {
 
@@ -27,8 +25,9 @@ public class FileWordParser implements WordParser {
     public String nextLine() {
         String s = scanner.next();
         s = s.trim();
+        s = s.replaceAll("^[^a-zA-Z]+|[^a-zA-Z]+$", "");
         s = s.replace('\n', ' '); //eliminate intermediate newline
-        s = s.toLowerCase();
+       // s = s.toLowerCase();
         if (s.length() == 0 && scanner.hasNext()) {
             return nextLine();
         } else {
@@ -41,15 +40,24 @@ public class FileWordParser implements WordParser {
         List<String> output = new LinkedList<>();
         while (hasNext()) {
             String line = nextLine();
+            line = line.toLowerCase();
             String[] sentences = line.split(regexSplit);
             for (String sentence : sentences) {
                 sentence = sentence.trim();
                 sentence = sentence.replace('-', ' ');  // split composed words
-                sentence = sentence.replaceAll("^[^a-zA-Z]+|[^a-zA-Z]+$", "");  // trim non char from beginning and end
+               // sentence = sentence.replaceAll("^[^a-zA-Z]+|[^a-zA-Z]+$", "");  // trim non char from beginning and end
                 if (sentence.length() >= DEFAULT_MIN_LENGTH ) {
                     output.add(sentence);
                 }
             }
+        }
+        return output;
+    }
+
+    public Set<String> getUniqueLines() {
+        Set<String> output = new HashSet<>();
+        while(hasNext()) {
+            output.add(nextLine());
         }
         return output;
     }
