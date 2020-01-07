@@ -12,7 +12,7 @@ public class RakeAnalyzer implements TextAnalyzer {
     private List<String> candidates;
     private List<String> stopWords;
     private WordsGraph textGraph, corpusGraph;
-    private Map<String, Double> contentWordScores;
+    private Map<String, Double> textWordScores, corpusWordScores;
     private String regexSplit;
 
     public RakeAnalyzer(StopWordsGenerator stopWordsGenerator) {
@@ -20,7 +20,6 @@ public class RakeAnalyzer implements TextAnalyzer {
         stopWords = stopWordsGenerator.getStopWords();
         textGraph = new WordsGraph();
         corpusGraph = null;
-        contentWordScores = new HashMap<>();
         buildRegexSplit();
     }
 
@@ -52,12 +51,23 @@ public class RakeAnalyzer implements TextAnalyzer {
         regexSplit = sb.toString();
     }
 
-    private void calculateWordScores(String strategy) {
-        List<Map.Entry<String, WordsGraph.WordData>> all = textGraph.getAllEntries();
+    private void buidCorpusWordScores(String strategy) {
+        corpusWordScores = calculateWordScores(corpusGraph, strategy);
+    }
+
+    private void buidTextWordScores(String strategy) {
+        if (corpusWordScores == null) {
+            /* if corpus is not existent score as single text, otherwise is a relative scoring */
+            textWordScores = calculateWordScores(textGraph, strategy);
+        }
 
 
-        Map<String, Double> relFreqs = textGraph.getWordRelativeFreqs();
+    }
 
+    private Map<String, Double> calculateWordScores(WordsGraph graph, String strategy) {
+        Map<String, Double> output = new HashMap<>();
+        List<Map.Entry<String, WordsGraph.WordData>> all = graph.getAllEntries();
+        Map<String, Double> relFreqs = graph.getWordRelativeFreqs();
         for(Map.Entry<String, WordsGraph.WordData> e : all) {
             String word = e.getKey();
             WordsGraph.WordData data = e.getValue();
@@ -84,20 +94,21 @@ public class RakeAnalyzer implements TextAnalyzer {
                     score = - score * Math.log(score) * data.frequency;
                     break;
             }
-            contentWordScores.put(word, score);
+            output.put(word, score);
         }
+        return output;
     }
 
     @Override
     public Map<String, Double> getKeywords(int n, String strategy) {
 
-        calculateWordScores(strategy);
+        buidTextWordScores(strategy);
         Map<String, Double> scoredCandidates = new HashMap<>();
         Set<String> setOfCandidates = new HashSet<>(candidates); // eliminate duplicates
         for(String candidate : setOfCandidates) {
             Double candidateScore = 0.0;
             for (String word : candidate.split(DEFAULT_WORD_DELIMITER)) {
-                candidateScore += contentWordScores.getOrDefault(word, 0.0);
+                candidateScore += textWordScores.getOrDefault(word, 0.0);
             }
             scoredCandidates.put(candidate, candidateScore / candidate.split(" ").length);
         }
@@ -116,10 +127,10 @@ public class RakeAnalyzer implements TextAnalyzer {
     public Map<String, Double> getKeyWordsSingle(int n, String strategy) {
         Map<String, Double> output = new HashMap<>();
         Map<String, Double> scoredCandidates = new HashMap<>();
-        calculateWordScores(strategy);
+        buidTextWordScores(strategy);
         for (Map.Entry<String, WordsGraph.WordData> e : textGraph.getAllEntries()) {
             String word = e.getKey();
-            scoredCandidates.put(word, contentWordScores.get(word));
+            scoredCandidates.put(word, textWordScores.get(word));
         }
 
         List<Map.Entry<String, Double>> allScores = new ArrayList<>(scoredCandidates.entrySet());
