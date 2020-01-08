@@ -4,6 +4,7 @@ import jevm.nutshell.engine.ScoredWord;
 import jevm.nutshell.engine.StopWordsFileReader;
 import jevm.nutshell.engine.TextAnalyzer;
 import jevm.nutshell.parser.FileWordParser;
+import jevm.nutshell.visualization.CloudVisualization;
 import org.apache.commons.cli.*;
 
 import java.io.File;
@@ -98,7 +99,9 @@ public class Main {
         TextAnalyzer analyzer = new TextAnalyzer(stopReader, scoring);
         analyzer.addText(wordParser);
 
-        List<ScoredWord> keywords1, keywords2;
+
+        List<ScoredWord> keywords1 = null;
+        List<ScoredWord> keywords2 = null;
         if (isCorpus) {
 
         } else {
@@ -106,21 +109,21 @@ public class Main {
             if (analysisKind.equals("single")) {
                 keywords1 = analyzer.getKeyWordsSingle(n);
             } else if (analysisKind.equals("multi")) {
-                keywords1 = analyzer.getKeyWordsSingle(n);
+                keywords1 = analyzer.getKeywords(n);
             } else {
                 FileWordParser allText = new FileWordParser(new File(filename));
-                for(String line : allText.getUniqueLines()) {
+                keywords1 = analyzer.getAbstract(allText, n);
+            }
 
-                }
-
+            if (hasVisualization) {
+                CloudVisualization v = new CloudVisualization();
+                v.addDataSet(filename, keywords1);
+                v.createWordCloud(visualizationFilename);
             }
         }
 
-
-
-
-
-
-
+        for (ScoredWord sw : keywords1) {
+            System.out.println(sw);
+        }
     }
 }

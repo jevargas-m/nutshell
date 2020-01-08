@@ -192,6 +192,9 @@ public class TextAnalyzer {
     }
 
     public double scoreSentence(String sentence) {
+        if (textWordScores == null) {
+            buidTextWordScores();
+        }
         sentence = sentence.toLowerCase();
         double score = 0.0;
         String [] words = sentence.split(DEFAULT_WORD_DELIMITER);
