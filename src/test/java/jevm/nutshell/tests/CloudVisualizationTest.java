@@ -4,19 +4,14 @@ import jevm.nutshell.engine.ScoredWord;
 import jevm.nutshell.engine.StopWordsFileReader;
 import jevm.nutshell.engine.TextAnalyzer;
 import jevm.nutshell.parser.FileWordParser;
-import jevm.nutshell.visualization.NutshellVisualization;
+import jevm.nutshell.visualization.CloudVisualization;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-class NutshellVisualizationTest {
+class CloudVisualizationTest {
 
     @Test
     void testCreateVisualization1() throws FileNotFoundException {
@@ -30,7 +25,7 @@ class NutshellVisualizationTest {
 
         List<ScoredWord> keywords = analyzer.getKeyWordsSingle(100);
 
-        NutshellVisualization v = new NutshellVisualization();
+        CloudVisualization v = new CloudVisualization();
         v.addDataSet("Test file", keywords);
         v.createWordCloud("nutshell.html");
     }
@@ -39,19 +34,19 @@ class NutshellVisualizationTest {
     void testCreateVisualization2() throws FileNotFoundException {
 
         StopWordsFileReader r1 = new StopWordsFileReader(new File("res/stopwords_EN.txt"));
-        TextAnalyzer analyzer = new TextAnalyzer(r1, "WEIGHTED_DEGREE");
+        TextAnalyzer analyzer = new TextAnalyzer(r1, "ENTROPY");
 
         File f2 = new File ("res/lord_rings.txt");
         FileWordParser fp = new FileWordParser(f2);
         analyzer.addText(fp);
 
-        List<ScoredWord> keywords = analyzer.getKeyWordsSingle(100);
+        List<ScoredWord> keywords = analyzer.getKeywords(100);
 
-        NutshellVisualization v = new NutshellVisualization();
+        CloudVisualization v = new CloudVisualization();
         v.addDataSet("Corpus", keywords);
 
         StopWordsFileReader r2 = new StopWordsFileReader(new File("res/stopwords_EN.txt"));
-        TextAnalyzer analyzer2 = new TextAnalyzer(r2, "WEIGHTED_DEGREE");
+        TextAnalyzer analyzer2 = new TextAnalyzer(r2, "ENTROPY");
 
         File f3 = new File ("res/lord_rings.txt");
         FileWordParser fp3 = new FileWordParser(f3);
@@ -60,7 +55,7 @@ class NutshellVisualizationTest {
         analyzer2.addCorpus(fp3);
         analyzer2.addText(fp4);
 
-        List<ScoredWord> keywords2 = analyzer2.getKeyWordsSingle(100);
+        List<ScoredWord> keywords2 = analyzer2.getKeywords(100);
 
         v.addDataSet("Text", keywords2);
         v.createWordCloud("nutshell.html");

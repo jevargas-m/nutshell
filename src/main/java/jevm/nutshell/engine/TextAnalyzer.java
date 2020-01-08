@@ -182,8 +182,9 @@ public class TextAnalyzer {
             scoredCandidates.add(new ScoredWord(word, textWordScores.get(word)));
         }
 
-        List<ScoredWord> output = new ArrayList<>(n);
+        List<ScoredWord> output = new ArrayList<>();
         for(int i = 0; i < n; i++) {
+            if (scoredCandidates.isEmpty()) break;
             output.add(scoredCandidates.remove());
         }
 
@@ -193,13 +194,33 @@ public class TextAnalyzer {
     public double scoreSentence(String sentence) {
         sentence = sentence.toLowerCase();
         double score = 0.0;
-        for (String word : sentence.split(DEFAULT_WORD_DELIMITER)) {
+        String [] words = sentence.split(DEFAULT_WORD_DELIMITER);
+        for (String word : words) {
             score += textWordScores.getOrDefault(word, 0.0);
         }
         return score;
     }
 
-    public int scoreWord(String word) {
-        return 0;
+    public List<ScoredWord> getAbstract(WordParser parser, int n) {
+        List<ScoredWord> output = new ArrayList<>();
+
+        Set<String> setOfLines = parser.getUniqueLines();
+
+        PriorityQueue<ScoredWord> scoredLines = new PriorityQueue<>();
+
+        for(String line : setOfLines) {
+            double score = scoreSentence(line);
+            ScoredWord sc = new ScoredWord(line, score);
+            scoredLines.add(sc);
+        }
+
+        for(int i = 0; i < 20; i++) {
+            if (scoredLines.isEmpty()) {
+                break;
+            }
+
+           output.add(scoredLines.remove());
+        }
+        return output;
     }
 }

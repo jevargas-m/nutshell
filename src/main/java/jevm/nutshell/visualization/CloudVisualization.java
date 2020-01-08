@@ -7,9 +7,9 @@ import org.json.simple.JSONObject;
 import java.io.*;
 import java.util.*;
 
-public class NutshellVisualization {
+public class CloudVisualization {
 
-    public static final int DEFAULT_MAX_SIZE = 100;
+    public static final int DEFAULT_MAX_SIZE = 80;
     public static final int DEFAULT_MIN_SIZE = 20;
 
     private int maxSize = DEFAULT_MAX_SIZE;
@@ -17,7 +17,7 @@ public class NutshellVisualization {
 
     private Map<String, Map<String, Integer>> normalizedData;
 
-    public NutshellVisualization() {
+    public CloudVisualization() {
         normalizedData = new HashMap<>();
     }
 
@@ -60,7 +60,6 @@ public class NutshellVisualization {
 
         return list.toJSONString();
     }
-
 
 
 
