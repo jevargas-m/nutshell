@@ -100,20 +100,20 @@ public class Main {
             List<ScoredWord> keywords2 = null;
 
             /* program controller */
-            try (ProgressBar pb = new ProgressBar(filename, 4)) {
+            try (ProgressBar fileProgress = new ProgressBar(filename, 4)) {
 
                 StopWordsFileReader stopReader = new StopWordsFileReader(new File(stopWordsFilename));
                 List<String> stopWords = stopReader.getStopWords();
-                pb.step();
+                fileProgress.step();
 
                 FileWordParser wordParser = new FileWordParser(new File(filename));
                 TextAnalyzer analyzer = new TextAnalyzer(stopWords, scoring);
 
                 List<String> lines = wordParser.getLines();
-                pb.step();
+                fileProgress.step();
 
                 analyzer.addText(lines);
-                pb.step();
+                fileProgress.step();
                 TextAnalyzer fullCorpusAnalyzer = new TextAnalyzer(stopWords, scoring);
 
                 if(isCorpus) {
@@ -132,7 +132,7 @@ public class Main {
                     keywords1 = analyzer.getAbstract(n);
                     if (isCorpus) keywords2 = fullCorpusAnalyzer.getAbstract(n);
                 }
-                pb.step();
+                fileProgress.step();
 
                 if(hasVisualization) {
                     CloudVisualization v = new CloudVisualization();

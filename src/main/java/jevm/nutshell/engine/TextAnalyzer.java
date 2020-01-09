@@ -18,24 +18,23 @@ public class TextAnalyzer {
 
     private List<String> textLines = new LinkedList<>();
     private List<String> corpusLines = new LinkedList<>();
-    private List<String> candidates;
+    private List<String> candidates = new LinkedList<>();
     private List<String> stopWords;
     private WordsGraph textGraph, corpusGraph;
     private Map<String, Double> textWordScores, corpusWordScores;
-    private String regexSplit, strategy;
+    private String regexSplit, scoringMethod;
 
     /**
      * Create a new analyzer, if corpus is added analysis is differencial of text vs corpus
      * if is not added analysis is of isolated file
      * @param stopWords list of stopwords, ignored for defining context
-     * @param strategy scoring method, available options in TextAnalyzer.scoringOptions
+     * @param scoring  scoring method, available options in TextAnalyzer.scoringOptions
      */
-    public TextAnalyzer(List<String> stopWords, String strategy) {
-        candidates = new LinkedList<>();
+    public TextAnalyzer(List<String> stopWords, String scoring ) {
         this.stopWords = stopWords;
         textGraph = new WordsGraph();
-        corpusGraph = null;
-        this.strategy = strategy;
+        corpusGraph = null; // null until one is add to flag analysis without corpus
+        this.scoringMethod = scoring ;
         buildRegexSplit();
     }
 
@@ -116,8 +115,8 @@ public class TextAnalyzer {
                 String word = e.getKey();
                 WordsGraph.WordData data = e.getValue();
                 if (corpusWordScores.containsKey(word) && corpusWordScores.get(word) != 0.0) {
-                    double thisWordScore = calcScore(strategy, data, relFreqs.get(word), true);
-                    if (!strategy.equals("ENTROPY")) {
+                    double thisWordScore = calcScore(scoringMethod, data, relFreqs.get(word), true);
+                    if (!scoringMethod.equals("ENTROPY")) {
                         double corpusScore = corpusWordScores.get(word);
                         if (corpusScore > Double.MIN_VALUE) {
                             textWordScores.put(word, thisWordScore / corpusScore);
@@ -135,16 +134,25 @@ public class TextAnalyzer {
             }
 
             /* normalize unknown words */
-            double min = Double.POSITIVE_INFINITY;
-            double max = Double.NEGATIVE_INFINITY;
-            for(Double score : textWordScores.values()) {
-                if (score > max) max = score;
-                if (score < min) min = score;
-            }
-            double scoreUnkown = min + (max - min) * UNKNOWN_SCORE_FACTOR;
-            for (String w : unknownWords) {
-                textWordScores.put(w, scoreUnkown * textGraph.getWordFreq(w));
-            }
+            normalizeUnknowns(unknownWords, UNKNOWN_SCORE_FACTOR);
+        }
+    }
+
+    /**
+     * give a normalized score to all unknown words in the list and add to
+     * textWordScores
+     * @param unknownWords
+     */
+    private void normalizeUnknowns(List<String> unknownWords, double factor) {
+        double min = Double.POSITIVE_INFINITY;
+        double max = Double.NEGATIVE_INFINITY;
+        for(Double score : textWordScores.values()) {
+            if (score > max) max = score;
+            if (score < min) min = score;
+        }
+        double scoreUnkown = min + (max - min) * factor;
+        for (String w : unknownWords) {
+            textWordScores.put(w, scoreUnkown * textGraph.getWordFreq(w));
         }
     }
 
@@ -154,7 +162,7 @@ public class TextAnalyzer {
         for(Map.Entry<String, WordsGraph.WordData> e : graph.getAllEntries()) {
             String word = e.getKey();
             WordsGraph.WordData data = e.getValue();
-            output.put(word, calcScore(strategy, data, relFreqs.get(word), false));
+            output.put(word, calcScore(scoringMethod, data, relFreqs.get(word), false));
         }
         return output;
     }
@@ -265,7 +273,7 @@ public class TextAnalyzer {
     public List<ScoredWord> getAbstract(int n) {
         List<ScoredWord> output = new ArrayList<>();
 
-        Set<String> setOfLines = new HashSet<>(textLines);
+        Set<String> setOfLines = new HashSet<>(textLines); //eliminate duplicates
 
         PriorityQueue<ScoredWord> scoredLines = new PriorityQueue<>();
 
