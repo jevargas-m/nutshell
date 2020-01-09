@@ -53,7 +53,7 @@ class WordsGraphTest {
         WordsGraph graph = new WordsGraph();
 
         while (fp.hasNext()) {
-            graph.addSentence(fp.nextLine(), " ");
+            graph.addString(fp.nextLine(), " ");
         }
 
         System.out.println("Alice word count = " + graph.getNumWords());
@@ -65,7 +65,7 @@ class WordsGraphTest {
         String sentence = "Mary has a little lamp, Mary has a big lamp, Mary is a happy girl.";
         WordsGraph g = new WordsGraph();
         for(String s : sentence.split(",.")) {
-            g.addSentence(s, " ");
+            g.addString(s, " ");
         }
 
         assertEquals(9, g.getNumWords());
@@ -80,7 +80,7 @@ class WordsGraphTest {
         String sentence = "Mary has a little lamp, Mary has a big lamp, Mary is a happy girl.";
         WordsGraph g = new WordsGraph();
         for(String s : sentence.split(",.")) {
-            g.addSentence(s, " ");
+            g.addString(s, " ");
         }
         assertEquals(2, g.getEdgeWeight("Mary", "has"));
         assertEquals(1, g.getEdgeWeight("a", "big"));
@@ -94,7 +94,7 @@ class WordsGraphTest {
         String sentence = "Mary has a little lamp, Mary has a big lamp, Mary is a happy girl.";
         WordsGraph g = new WordsGraph();
         for(String s : sentence.split(",.")) {
-            g.addSentence(s, " ");
+            g.addString(s, " ");
         }
         List<Map.Entry<String, WordsGraph.WordData>> l = g.getSortedList(WordsGraph.compareByWordFrequency());
         for (Map.Entry<String, WordsGraph.WordData> e : l){
@@ -106,7 +106,7 @@ class WordsGraphTest {
     @Test
     void testAliceTopFreqs() throws FileNotFoundException {
         File f = new File ("res/alice.txt");
-        WordsGraph graph = new WordsGraph(new FileWordParser(f));
+        WordsGraph graph = new WordsGraph();
 
         List<Map.Entry<String, WordsGraph.WordData>> l = graph.getSortedList(WordsGraph.compareByWordFrequency());
         for (int i = 0; i < 100; i++){
@@ -119,7 +119,7 @@ class WordsGraphTest {
         String sentence = "Mary has a little lamp, Mary has a big lamp, Mary is a happy girl.";
         WordsGraph g = new WordsGraph();
         for(String s : sentence.split("[,.]")) {
-            g.addSentence(s);
+            g.addString(s);
         }
         Map<WordsGraph.Edge, Integer> map = g.getAllWeightedEdges();
         for (WordsGraph.Edge e : map.keySet()) {

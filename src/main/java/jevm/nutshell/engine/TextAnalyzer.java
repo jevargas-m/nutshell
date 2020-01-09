@@ -5,6 +5,7 @@ import java.util.*;
 
 public class TextAnalyzer {
 
+    public static final String[] scoringOptions = {"DEGREE", "WEIGHTED_DEGREE", "ENTROPY", "RELATIVE_DEGREE", "FREQUENCY"};
 
     public static final String DEFAULT_WORD_DELIMITER = "\\s";
     private static final int DEFAULT_MIN_LENGTH = 2;

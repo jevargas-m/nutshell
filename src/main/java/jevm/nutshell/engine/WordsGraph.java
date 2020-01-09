@@ -1,9 +1,11 @@
 package jevm.nutshell.engine;
 
-import jevm.nutshell.parser.WordParser;
-
 import java.util.*;
 
+/**
+ * Weighted directed graph of words for text analysis, each word maintains
+ * its frequency, and each edge also maintain its frequency
+ */
 public class WordsGraph {
     public static final String DEFAULT_WORD_DELIMITER = "\\s";
 
@@ -15,36 +17,31 @@ public class WordsGraph {
         adjacencySets = new HashMap<>();
     }
 
-    public WordsGraph(WordParser wordParser) {
-        this(wordParser, DEFAULT_WORD_DELIMITER);
-    }
-
-    public WordsGraph(WordParser wordParser, String wordDelimiter) {
-        this();
-        addAll(wordParser, wordDelimiter);
-    }
-
-    public void addAll(WordParser wordParser) {
-        addAll(wordParser, DEFAULT_WORD_DELIMITER);
-    }
-
-    public void addAll(WordParser wordParser, String wordDelimiter) {
-        while (wordParser.hasNext()) {
-            addSentence(wordParser.nextLine(), wordDelimiter);
-        }
-    }
-
+    /**
+     * Add a collection of strings to the graph, each string may contain several
+     * words in which case each it is split as per the supplied regex
+     * @param collection
+     * @param wordDelimiter regex to use for split words
+     */
     public void addAll(Collection<String> collection, String wordDelimiter) {
         for(String sentence : collection) {
-            addSentence(sentence, wordDelimiter);
+            addString(sentence, wordDelimiter);
         }
     }
 
+    /**
+     * Add a collection of strings to the graph, each string may contain several
+     * words in which case each it is split as per  default value
+     * WordsGraph.DEFAULT_WORD_DELIMITER
+     * @param collection
+     */
     public void addAll(Collection<String> collection) {
         addAll(collection, DEFAULT_WORD_DELIMITER);
     }
 
-
+    /**
+     * Data kept for each node word
+     */
     public class WordData {
         Map<Edge, Integer> weightedEdges = new HashMap<>(); // Weighted Edge
         int frequency = 0;
@@ -83,6 +80,10 @@ public class WordsGraph {
         }
     }
 
+    /**
+     * A a singhle word to the graph
+     * @param word
+     */
     public void addWord(String word) {
         if (word == null || word.equals("")) return;
         WordData data = adjacencySets.getOrDefault(word, new WordData());;
@@ -90,7 +91,13 @@ public class WordsGraph {
         adjacencySets.put(word, data);
     }
 
-    // Only from frequency is updated
+    /**
+     * Add a new edge to the graph, if either word is not in the graph it
+     * will be added first.  Only the frequency of the first word is updated
+     * so addWord(to) needs to be called afterwards.
+      * @param from
+     * @param to
+     */
     public void addEdge(String from, String to) {
         if (from == null || from.equals("")) return;
 
@@ -124,12 +131,23 @@ public class WordsGraph {
         adjacencySets.put(from, fromData);
     }
 
-    public void addSentence(String sentence) {
-        addSentence(sentence, DEFAULT_WORD_DELIMITER);
+    /**
+     * Add a new string which may contain several words in which case each it is split
+     * as per default value WordsGraph.DEFAULT_WORD_DELIMITER
+     * @param s
+     */
+    public void addString(String s) {
+        addString(s, DEFAULT_WORD_DELIMITER);
     }
 
-    public void addSentence(String sentence, String delim) {
-        String[] words = sentence.split(delim);
+    /**
+     * Add a new string which may contain several words in which case each it is split
+     * as per the supplied regex
+     * @param s
+     * @param delim regex used for split
+     */
+    public void addString(String s, String delim) {
+        String[] words = s.split(delim);
         if (words.length == 0) return;
 
         for (int i = 0; i < words.length - 1; i++) {
@@ -138,6 +156,11 @@ public class WordsGraph {
         addWord(words[words.length - 1]);
     }
 
+    /**
+     * Get a sorted list of all words in the graph as map entries with their corresponding data
+     * @param comparator
+     * @return
+     */
     public List<Map.Entry<String, WordData>> getSortedList(Comparator<Map.Entry<String, WordData>> comparator) {
         List<Map.Entry<String, WordData>> entries = new ArrayList<>(adjacencySets.entrySet());
 
@@ -145,6 +168,12 @@ public class WordsGraph {
         return entries;
     }
 
+    /**
+     * Get frequency of a word.
+     * If word is not in the graph returns -1
+     * @param s
+     * @return
+     */
     public int getWordFreq(String s) {
         if (!adjacencySets.containsKey(s)) {
             return -1;
@@ -153,6 +182,12 @@ public class WordsGraph {
         }
     }
 
+    /**
+     * Get word out-degree of unique edges going out
+     * If word is not in the graph returns -1
+     * @param s
+     * @return
+     */
     public int getWordOutDegree(String s) {
         if (!adjacencySets.containsKey(s)) {
             return -1;
@@ -161,6 +196,12 @@ public class WordsGraph {
         }
     }
 
+    /**
+     * Get word in-degree of unique edges going out
+     * If word is not in the graph returns -1
+     * @param s
+     * @return
+     */
     public int getWordInDegree(String s) {
         if (!adjacencySets.containsKey(s)) {
             return -1;
@@ -168,6 +209,7 @@ public class WordsGraph {
             return adjacencySets.get(s).inDegree;
         }
     }
+
 
     public static Comparator<Map.Entry<String, WordData>> compareByWordFrequency () {
         return new Comparator<Map.Entry<String, WordData>>() {
@@ -184,6 +226,13 @@ public class WordsGraph {
         };
     }
 
+    /**
+     * Get the frequency this edge has been added to the graph
+     * If edge is not in the graph returns -1
+     * @param from
+     * @param to
+     * @return
+     */
     public Integer getEdgeWeight(String from, String to) {
         Edge e = new Edge(from, to);
         if (!adjacencySets.containsKey(from) || !adjacencySets.containsKey(to)) return -1;
@@ -192,22 +241,34 @@ public class WordsGraph {
         return (edges.getOrDefault(e, -1));
     }
 
-    public Map<String, WordData> getAdjacencySets() {
-        return adjacencySets;
-    }
-
+    /**
+     * Total unique node words in the graph
+     * @return
+     */
     public int getNumWords() {
         return adjacencySets.size();
     }
 
+    /**
+     * total unique edges in the graph
+     * @return
+     */
     public int getNumEdges() {
         return numEdges;
     }
 
+    /**
+     * List of all entries in the graph
+     * @return
+     */
     public List<Map.Entry<String, WordData>> getAllEntries() {
         return new ArrayList<>(adjacencySets.entrySet());
     }
 
+    /**
+     * Get all edges in the graph with their corresponding weight
+     * @return
+     */
     public Map<Edge, Integer> getAllWeightedEdges() {
         Map<Edge, Integer> output = new HashMap<>();
         for(Map.Entry<String, WordData> entry : adjacencySets.entrySet()) {
@@ -220,6 +281,11 @@ public class WordsGraph {
         return output;
     }
 
+    /**
+     * Calculate relative frequency of all words in the graph
+     * relative frequency = node word frequency / sum of all node word frequencies
+     * @return
+     */
     public Map<String, Double> getWordRelativeFreqs() {
         Map<String, Double> output = new HashMap<>();
 
