@@ -216,6 +216,7 @@ public class TextAnalyzer {
         PriorityQueue<ScoredWord> scoredLines = new PriorityQueue<>();
 
         for(String line : setOfLines) {
+            if (line.length() < DEFAULT_MIN_LENGTH) continue;
             double score = scoreSentence(line);
             String capitalizedLine = line.substring(0, 1).toUpperCase() + line.substring(1);
             ScoredWord sc = new ScoredWord(capitalizedLine, score);
