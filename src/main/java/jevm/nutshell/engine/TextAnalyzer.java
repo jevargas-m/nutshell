@@ -1,6 +1,8 @@
 package jevm.nutshell.engine;
 
 
+import jevm.nutshell.data.ScoredWord;
+
 import java.util.*;
 
 /**

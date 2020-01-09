@@ -1,8 +1,8 @@
 package jevm.nutshell.tests;
 
 import jevm.nutshell.engine.TextAnalyzer;
-import jevm.nutshell.engine.ScoredWord;
-import jevm.nutshell.engine.StopWordsFileReader;
+import jevm.nutshell.data.ScoredWord;
+import jevm.nutshell.parser.StopWordsFileReader;
 import jevm.nutshell.parser.FileWordParser;
 import org.junit.jupiter.api.Test;
 

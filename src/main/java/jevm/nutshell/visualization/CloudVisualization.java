@@ -1,6 +1,6 @@
 package jevm.nutshell.visualization;
 
-import jevm.nutshell.engine.ScoredWord;
+import jevm.nutshell.data.ScoredWord;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 

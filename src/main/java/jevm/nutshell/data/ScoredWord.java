@@ -1,5 +1,5 @@
 
-package jevm.nutshell.engine;
+package jevm.nutshell.data;
 
 public class ScoredWord implements Comparable {
 

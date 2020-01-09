@@ -1,6 +1,6 @@
 package jevm.nutshell.tests;
 
-import jevm.nutshell.engine.StopWordsFileReader;
+import jevm.nutshell.parser.StopWordsFileReader;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
