@@ -133,7 +133,7 @@ public class Main {
                 System.out.println(sw);
             }
 
-        } catch (ParseException | NumberFormatException e) {
+        } catch (ParseException | IllegalArgumentException e) {
             System.out.println("Invalid arguments");
             helpFormatter.printHelp("test", options);
         } catch (IOException e) {
