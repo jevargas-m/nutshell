@@ -100,47 +100,41 @@ public class Main {
             List<ScoredWord> keywords2 = null;
 
             /* program controller */
-            try (ProgressBar fileProgress = new ProgressBar(filename, 4)) {
 
-                StopWordsFileReader stopReader = new StopWordsFileReader(new File(stopWordsFilename));
-                List<String> stopWords = stopReader.getStopWords();
-                fileProgress.step();
+            StopWordsFileReader stopReader = new StopWordsFileReader(new File(stopWordsFilename));
+            List<String> stopWords = stopReader.getStopWords();
 
-                FileWordParser wordParser = new FileWordParser(new File(filename));
-                TextAnalyzer analyzer = new TextAnalyzer(stopWords, scoring);
+            FileWordParser wordParser = new FileWordParser(new File(filename));
+            TextAnalyzer analyzer = new TextAnalyzer(stopWords, scoring);
 
-                List<String> lines = wordParser.getLines();
-                fileProgress.step();
+            List<String> lines = wordParser.getLines();
 
-                analyzer.addText(lines);
-                fileProgress.step();
-                TextAnalyzer fullCorpusAnalyzer = new TextAnalyzer(stopWords, scoring);
+            analyzer.addText(lines);
+            TextAnalyzer fullCorpusAnalyzer = new TextAnalyzer(stopWords, scoring);
 
-                if(isCorpus) {
-                    processCorpus(corpusDir, analyzer, fullCorpusAnalyzer);
-                }
+            if(isCorpus) {
+                processCorpus(corpusDir, analyzer, fullCorpusAnalyzer);
+            }
 
-                if(analysisKind.equals("single")) {
-                    keywords1 = analyzer.getKeyWordsSingle(n);
-                    if (isCorpus) keywords2 = fullCorpusAnalyzer.getKeyWordsSingle(n);
+            if(analysisKind.equals("single")) {
+                keywords1 = analyzer.getKeyWordsSingle(n);
+                if (isCorpus) keywords2 = fullCorpusAnalyzer.getKeyWordsSingle(n);
 
-                } else if(analysisKind.equals("multi")) {
-                    keywords1 = analyzer.getKeywords(n);
-                    if (isCorpus) keywords2 = fullCorpusAnalyzer.getKeywords(n);
+            } else if(analysisKind.equals("multi")) {
+                keywords1 = analyzer.getKeywords(n);
+                if (isCorpus) keywords2 = fullCorpusAnalyzer.getKeywords(n);
 
-                } else {
-                    keywords1 = analyzer.getAbstract(n);
-                    if (isCorpus) keywords2 = fullCorpusAnalyzer.getAbstract(n);
-                }
-                fileProgress.step();
+            } else {
+                keywords1 = analyzer.getAbstract(n);
+                if (isCorpus) keywords2 = fullCorpusAnalyzer.getAbstract(n);
+            }
 
-                if(hasVisualization) {
-                    CloudVisualization v = new CloudVisualization();
-                    v.addDataSet(filename, keywords1);
-                    if (isCorpus) v.addDataSet("Full Corpus", keywords2);
-                    v.createWordCloud(visualizationFilename);
-                }
-            } // try pb
+            if(hasVisualization) {
+                CloudVisualization v = new CloudVisualization();
+                v.addDataSet(filename, keywords1);
+                if (isCorpus) v.addDataSet("Full Corpus", keywords2);
+                v.createWordCloud(visualizationFilename);
+            }
 
             /* print output to console */
             for (ScoredWord sw : keywords1) {
