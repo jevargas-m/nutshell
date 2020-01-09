@@ -7,6 +7,9 @@ import org.json.simple.JSONObject;
 import java.io.*;
 import java.util.*;
 
+/**
+ * Generate a html file with scored words datasets, each dataset becomes one cloud
+ */
 public class CloudVisualization {
 
     public static final int DEFAULT_MAX_SIZE = 80;
@@ -21,6 +24,11 @@ public class CloudVisualization {
         normalizedData = new HashMap<>();
     }
 
+    /**
+     * Add a new dataset for generating its word cloud
+     * @param name
+     * @param data
+     */
     public void addDataSet(String name, List<ScoredWord> data) {
         normalizedData.put(name, normalize(data));
     }
@@ -62,7 +70,11 @@ public class CloudVisualization {
     }
 
 
-
+    /**
+     * Create a word cloud as a html file with all the datasets previously added
+     * @param filename output filename
+     * @throws FileNotFoundException
+     */
     public void createWordCloud(String filename) throws FileNotFoundException {
         File f = new File(filename);
         PrintWriter pw = new PrintWriter(f);
@@ -114,10 +126,18 @@ public class CloudVisualization {
         pw.close();
     }
 
+    /**
+     * Max font size
+     * @param maxSize
+     */
     public void setMaxSize(int maxSize) {
         this.maxSize = maxSize;
     }
 
+    /**
+     * Min font size
+     * @param minSize
+     */
     public void setMinSize(int minSize) {
         this.minSize = minSize;
     }
