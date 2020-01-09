@@ -12,7 +12,7 @@ import java.util.*;
  */
 public class CloudVisualization {
 
-    public static final int DEFAULT_MAX_SIZE = 80;
+    public static final int DEFAULT_MAX_SIZE = 100;
     public static final int DEFAULT_MIN_SIZE = 20;
 
     private int maxSize = DEFAULT_MAX_SIZE;

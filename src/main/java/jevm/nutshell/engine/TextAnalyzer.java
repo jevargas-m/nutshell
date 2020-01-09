@@ -13,7 +13,7 @@ public class TextAnalyzer {
     public static final String[] scoringOptions = {"DEGREE", "WEIGHTED_DEGREE", "ENTROPY", "RELATIVE_DEGREE", "FREQUENCY"};
 
     public static final String DEFAULT_WORD_DELIMITER = "\\s";
-    private static final int DEFAULT_MIN_LENGTH = 2;
+    private static final int DEFAULT_MIN_LENGTH = 3;
     public static double UNKNOWN_SCORE_FACTOR = 1.3;
 
     private List<String> textLines = new LinkedList<>();
@@ -205,18 +205,25 @@ public class TextAnalyzer {
     public List<ScoredWord> getKeywords(int n) {
 
         buidTextWordScores();
-        Queue<ScoredWord> scoredCandidates = new PriorityQueue<>();
 
-        Set<String> setOfCandidates = new HashSet<>(candidates); // eliminate duplicates
-        for(String candidate : setOfCandidates) {
-            double candidateScore = scoreString(candidate);
-            scoredCandidates.add(new ScoredWord(candidate, candidateScore));
+        /* additive scoring to account candidate frequency */
+        Map <String, Double> scoredCandidates = new HashMap<>();
+        for(String candidate : candidates) {
+            double score = scoredCandidates.getOrDefault(candidate, 0.0) + scoreString(candidate);
+            scoredCandidates.put(candidate, score);
         }
 
+        /* use a head to sort from max to min candidate */
+        PriorityQueue<ScoredWord> sortedCandidates = new PriorityQueue<>();
+        for (String candidate : scoredCandidates.keySet()) {
+            sortedCandidates.add(new ScoredWord(candidate, scoredCandidates.get(candidate)));
+        }
+
+        /* only output top n candidates */
         List<ScoredWord> output = new ArrayList<>(n);
         for(int i = 0; i < n; i++) {
-            if (!scoredCandidates.isEmpty()) {
-                output.add(scoredCandidates.remove());
+            if (!sortedCandidates.isEmpty()) {
+                output.add(sortedCandidates.remove());
             }
         }
 
