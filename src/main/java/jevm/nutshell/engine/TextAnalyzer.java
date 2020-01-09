@@ -3,6 +3,9 @@ package jevm.nutshell.engine;
 
 import java.util.*;
 
+/**
+ * Text analyzer using different scoring methods
+ */
 public class TextAnalyzer {
 
     public static final String[] scoringOptions = {"DEGREE", "WEIGHTED_DEGREE", "ENTROPY", "RELATIVE_DEGREE", "FREQUENCY"};
@@ -19,6 +22,12 @@ public class TextAnalyzer {
     private Map<String, Double> textWordScores, corpusWordScores;
     private String regexSplit, strategy;
 
+    /**
+     * Create a new analyzer, if corpus is added analysis is differencial of text vs corpus
+     * if is not added analysis is of isolated file
+     * @param stopWords list of stopwords, ignored for defining context
+     * @param strategy scoring method, available options in TextAnalyzer.scoringOptions
+     */
     public TextAnalyzer(List<String> stopWords, String strategy) {
         candidates = new LinkedList<>();
         this.stopWords = stopWords;
@@ -28,29 +37,49 @@ public class TextAnalyzer {
         buildRegexSplit();
     }
 
+    /**
+     * Add a new list of raw strings to use as corpus, may be called several times in
+     * which corpus keeps growing
+     * @param lines
+     */
     public void addCorpus(List<String> lines) {
         if (corpusGraph == null) {
             corpusGraph = new WordsGraph();
         }
         corpusLines.addAll(lines);
-        corpusGraph.addAll(getListOfSentences(lines));
+        corpusGraph.addAll(getKeywordCandidates(lines));
     }
 
+    /**
+     * Add a new list of raw strings to use as text under analysis, may be called
+     * several times in which text keeps growing
+     * @param lines
+     */
     public void addText(List<String> lines) {
         textLines.addAll(lines);
-        candidates = getListOfSentences(lines);
+        candidates = getKeywordCandidates(lines);
         textGraph.addAll(candidates);
     }
 
+    /**
+     * Delete text under analysis maintaining corpus
+     */
     public void resetText() {
         candidates = new LinkedList<>();
         textGraph = new WordsGraph();
     }
 
+    /**
+     * Score text words
+     */
     public void analize() {
         buidTextWordScores();
     }
 
+    /**
+     * Create a sting of regex with all the stop words to use on a split method
+     * TODO: improve with a full developed parser, if list is too large may fail and/or be inefficient
+     */
     private void buildRegexSplit() {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
@@ -157,6 +186,12 @@ public class TextAnalyzer {
         return score;
     }
 
+    /**
+     * Get a list of keywords sorted descending on score, keywords may be multi-word
+     * depending on scoring results.
+     * @param n number of keywords to generate
+     * @return
+     */
     public List<ScoredWord> getKeywords(int n) {
 
         buidTextWordScores();
@@ -164,7 +199,7 @@ public class TextAnalyzer {
 
         Set<String> setOfCandidates = new HashSet<>(candidates); // eliminate duplicates
         for(String candidate : setOfCandidates) {
-            double candidateScore = scoreSentence(candidate);
+            double candidateScore = scoreString(candidate);
             scoredCandidates.add(new ScoredWord(candidate, candidateScore));
         }
 
@@ -178,6 +213,11 @@ public class TextAnalyzer {
         return output;
     }
 
+    /**
+     * Get a list of keywords sorted descending on score, keywords are single word
+     * @param n number of keywords to generate
+     * @return
+     */
     public List<ScoredWord> getKeyWordsSingle(int n) {
 
         Queue<ScoredWord> scoredCandidates = new PriorityQueue<>();
@@ -196,19 +236,30 @@ public class TextAnalyzer {
         return output;
     }
 
-    public double scoreSentence(String sentence) {
+    /**
+     * Score a string of text according to word scores
+     * @param s
+     * @return
+     */
+    public double scoreString(String s) {
         if (textWordScores == null) {
             buidTextWordScores();
         }
-        sentence = sentence.toLowerCase();
+        s = s.toLowerCase();
         double score = 0.0;
-        String [] words = sentence.split(DEFAULT_WORD_DELIMITER);
+        String [] words = s.split(DEFAULT_WORD_DELIMITER);
         for (String word : words) {
             score += textWordScores.getOrDefault(word, 0.0);
         }
         return score;
     }
 
+    /**
+     * Get a list of raw lines (including stop words) delimited only by punctuation
+     * sorted by descending score
+     * @param n
+     * @return
+     */
     public List<ScoredWord> getAbstract(int n) {
         List<ScoredWord> output = new ArrayList<>();
 
@@ -218,7 +269,7 @@ public class TextAnalyzer {
 
         for(String line : setOfLines) {
             if (line.length() < DEFAULT_MIN_LENGTH) continue;
-            double score = scoreSentence(line);
+            double score = scoreString(line);
             String capitalizedLine = line.substring(0, 1).toUpperCase() + line.substring(1);
             ScoredWord sc = new ScoredWord(capitalizedLine, score);
             scoredLines.add(sc);
@@ -234,7 +285,13 @@ public class TextAnalyzer {
         return output;
     }
 
-    public List<String> getListOfSentences(List<String> lines) {
+    /**
+     * Get a list of content candidates split by stopwords and punctuation
+     * (works using RAKE methodology)
+     * @param lines
+     * @return
+     */
+    public List<String> getKeywordCandidates(List<String> lines) {
         List<String> output = new LinkedList<>();
 
         for (String line : lines) {

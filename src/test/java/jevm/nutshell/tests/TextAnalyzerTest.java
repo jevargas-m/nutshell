@@ -153,7 +153,7 @@ class TextAnalyzerTest {
         PriorityQueue<ScoredWord> scoredLines = new PriorityQueue<>();
 
         for(String line : setOfLines) {
-            double score = analyzer.scoreSentence(line);
+            double score = analyzer.scoreString(line);
             ScoredWord sc = new ScoredWord(line, score);
             scoredLines.add(sc);
         }
