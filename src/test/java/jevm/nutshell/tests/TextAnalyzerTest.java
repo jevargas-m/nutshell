@@ -16,22 +16,22 @@ class TextAnalyzerTest {
     void addParser() throws FileNotFoundException {
         File f1 = new File("res/stopwords_EN.txt");
         StopWordsFileReader r = new StopWordsFileReader(f1);
-        TextAnalyzer analyzer = new TextAnalyzer(r, "WEIGHTED_DEGREE");
+        TextAnalyzer analyzer = new TextAnalyzer(r.getStopWords(), "WEIGHTED_DEGREE");
 
         File f2 = new File ("res/alice.txt");
         FileWordParser fp = new FileWordParser(f2);
-        analyzer.addText(fp);
+        analyzer.addText(fp.getLines());
     }
 
     @Test
     void getKeyWords() throws FileNotFoundException {
         File f1 = new File("res/stopwords_EN.txt");
         StopWordsFileReader r = new StopWordsFileReader(f1);
-        TextAnalyzer analyzer = new TextAnalyzer(r, "WEIGHTED_DEGREE");
+        TextAnalyzer analyzer = new TextAnalyzer(r.getStopWords(), "WEIGHTED_DEGREE");
 
         File f2 = new File ("res/lord_rings.txt");
         FileWordParser fp = new FileWordParser(f2);
-        analyzer.addText(fp);
+        analyzer.addText(fp.getLines());
 
         List<ScoredWord> keywords = analyzer.getKeywords(20);
         for(ScoredWord k : keywords) {
@@ -43,11 +43,11 @@ class TextAnalyzerTest {
     void testKeywordsSingle() throws FileNotFoundException {
         File f1 = new File("res/stopwords_EN.txt");
         StopWordsFileReader r = new StopWordsFileReader(f1);
-        TextAnalyzer analyzer = new TextAnalyzer(r, "WEIGHTED_DEGREE");
+        TextAnalyzer analyzer = new TextAnalyzer(r.getStopWords(), "WEIGHTED_DEGREE");
 
         File f2 = new File ("res/lord_rings.txt");
         FileWordParser fp = new FileWordParser(f2);
-        analyzer.addText(fp);
+        analyzer.addText(fp.getLines());
 
         List<ScoredWord> keywords = analyzer.getKeyWordsSingle(100);
         System.out.println("--------------- ENTROPY -----------------------------------");
@@ -75,13 +75,13 @@ class TextAnalyzerTest {
     void testCorpus1() throws FileNotFoundException {
         File f1 = new File("res/stopwords_EN.txt");
         StopWordsFileReader r = new StopWordsFileReader(f1);
-        TextAnalyzer analyzer = new TextAnalyzer(r, "RELATIVE_DEGREE");
+        TextAnalyzer analyzer = new TextAnalyzer(r.getStopWords(), "RELATIVE_DEGREE");
 
         FileWordParser fp1 = new FileWordParser(new File ("res/lord_rings.txt"));
-        analyzer.addCorpus(fp1);
+        analyzer.addCorpus(fp1.getLines());
 
         FileWordParser fp1_1 = new FileWordParser(new File ("res/lord_rings_6.txt"));
-        analyzer.addText(fp1_1);
+        analyzer.addText(fp1_1.getLines());
 
         List<ScoredWord> keywords = analyzer.getKeywords(500);
         System.out.println("--------------- WEIGHTED_DEGREE -----------------------------------");
@@ -92,7 +92,7 @@ class TextAnalyzerTest {
 
         FileWordParser fp1_6 = new FileWordParser(new File ("res/lord_rings_1.txt"));
         analyzer.resetText();
-        analyzer.addText(fp1_6);
+        analyzer.addText(fp1_6.getLines());
 
         keywords = analyzer.getKeywords(50);
         System.out.println("--------------- WEIGHTED_DEGREE -----------------------------------");
@@ -109,13 +109,13 @@ class TextAnalyzerTest {
     void testCorpus2() throws FileNotFoundException {
         File f1 = new File("res/stopwords_EN.txt");
         StopWordsFileReader r = new StopWordsFileReader(f1);
-        TextAnalyzer analyzer = new TextAnalyzer(r, "ENTROPY");
+        TextAnalyzer analyzer = new TextAnalyzer(r.getStopWords(), "ENTROPY");
 
         FileWordParser fp1 = new FileWordParser(new File ("res/lord_rings.txt"));
-        analyzer.addCorpus(fp1);
+        analyzer.addCorpus(fp1.getLines());
 
         FileWordParser fp1_1 = new FileWordParser(new File ("res/lord_rings_6.txt"));
-        analyzer.addText(fp1_1);
+        analyzer.addText(fp1_1.getLines());
 
         List<ScoredWord> keywords = analyzer.getKeyWordsSingle(20);
         System.out.println("--------------- \"ENTROPY\" -----------------------------------");
@@ -126,7 +126,7 @@ class TextAnalyzerTest {
 
         FileWordParser fp1_6 = new FileWordParser(new File ("res/lord_rings_1.txt"));
         analyzer.resetText();
-        analyzer.addText(fp1_6);
+        analyzer.addText(fp1_6.getLines());
 
         keywords = analyzer.getKeyWordsSingle(20);
         System.out.println("--------------- \"ENTROPY\" -----------------------------------");
@@ -140,15 +140,15 @@ class TextAnalyzerTest {
     void createAbstractTest() throws FileNotFoundException {
         File f1 = new File("res/stopwords_EN.txt");
         StopWordsFileReader r = new StopWordsFileReader(f1);
-        TextAnalyzer analyzer = new TextAnalyzer(r, "WEIGHTED_DEGREE");
+        TextAnalyzer analyzer = new TextAnalyzer(r.getStopWords(), "WEIGHTED_DEGREE");
 
         File f2 = new File ("res/mobydick.txt");
         FileWordParser fp = new FileWordParser(f2);
-        analyzer.addText(fp);
+        analyzer.addText(fp.getLines());
         analyzer.analize();
 
         FileWordParser fp2 = new FileWordParser(f2);
-        Set<String> setOfLines = fp2.getUniqueLines();
+        Set<String> setOfLines = new HashSet<>(fp2.getLines());
 
         PriorityQueue<ScoredWord> scoredLines = new PriorityQueue<>();
 

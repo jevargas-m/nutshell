@@ -1,6 +1,5 @@
 package jevm.nutshell.engine;
 
-import jevm.nutshell.parser.WordParser;
 
 import java.util.*;
 
@@ -8,32 +7,37 @@ public class TextAnalyzer {
 
 
     public static final String DEFAULT_WORD_DELIMITER = "\\s";
+    private static final int DEFAULT_MIN_LENGTH = 2;
     public static double UNKNOWN_SCORE_FACTOR = 1.3;
 
+    private List<String> textLines = new LinkedList<>();
+    private List<String> corpusLines = new LinkedList<>();
     private List<String> candidates;
     private List<String> stopWords;
     private WordsGraph textGraph, corpusGraph;
     private Map<String, Double> textWordScores, corpusWordScores;
     private String regexSplit, strategy;
 
-    public TextAnalyzer(StopWordsGenerator stopWordsGenerator, String strategy) {
+    public TextAnalyzer(List<String> stopWords, String strategy) {
         candidates = new LinkedList<>();
-        stopWords = stopWordsGenerator.getStopWords();
+        this.stopWords = stopWords;
         textGraph = new WordsGraph();
         corpusGraph = null;
         this.strategy = strategy;
         buildRegexSplit();
     }
 
-    public void addCorpus(WordParser parser) {
+    public void addCorpus(List<String> lines) {
         if (corpusGraph == null) {
             corpusGraph = new WordsGraph();
         }
-        corpusGraph.addAll(parser.getListOfSentences(regexSplit));
+        corpusLines.addAll(lines);
+        corpusGraph.addAll(getListOfSentences(lines));
     }
 
-    public void addText(WordParser wordParser) {
-        candidates = wordParser.getListOfSentences(regexSplit);
+    public void addText(List<String> lines) {
+        textLines.addAll(lines);
+        candidates = getListOfSentences(lines);
         textGraph.addAll(candidates);
     }
 
@@ -204,16 +208,17 @@ public class TextAnalyzer {
         return score;
     }
 
-    public List<ScoredWord> getAbstract(WordParser parser, int n) {
+    public List<ScoredWord> getAbstract(int n) {
         List<ScoredWord> output = new ArrayList<>();
 
-        Set<String> setOfLines = parser.getUniqueLines();
+        Set<String> setOfLines = new HashSet<>(textLines);
 
         PriorityQueue<ScoredWord> scoredLines = new PriorityQueue<>();
 
         for(String line : setOfLines) {
             double score = scoreSentence(line);
-            ScoredWord sc = new ScoredWord(line, score);
+            String capitalizedLine = line.substring(0, 1).toUpperCase() + line.substring(1);
+            ScoredWord sc = new ScoredWord(capitalizedLine, score);
             scoredLines.add(sc);
         }
 
@@ -224,6 +229,24 @@ public class TextAnalyzer {
 
            output.add(scoredLines.remove());
         }
+        return output;
+    }
+
+    public List<String> getListOfSentences(List<String> lines) {
+        List<String> output = new LinkedList<>();
+
+        for (String line : lines) {
+            line = line.toLowerCase();
+            String[] sentences = line.split(regexSplit);
+            for (String sentence : sentences) {
+                sentence = sentence.trim();
+                sentence = sentence.replace('-', ' ');  // split composed words
+                if (sentence.length() >= DEFAULT_MIN_LENGTH ) {
+                    output.add(sentence);
+                }
+            }
+        }
+
         return output;
     }
 }

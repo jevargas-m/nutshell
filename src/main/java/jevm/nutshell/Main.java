@@ -9,6 +9,8 @@ import org.apache.commons.cli.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,6 +26,7 @@ public class Main {
         boolean isCorpus = false;
         boolean hasVisualization = false;
         String analysisKind = "";
+        String corpusDir = "";
         int n = 0;
         String visualizationFilename = "nutshell.html";
         String stopWordsFilename = "stopwords_EN.txt";
@@ -42,6 +45,7 @@ public class Main {
 
         HelpFormatter helpFormatter = new HelpFormatter();
         CommandLineParser parser = new DefaultParser();
+        File corpusDirFile;
 
         try {
             CommandLine cmd = parser.parse(options, args);
@@ -59,6 +63,8 @@ public class Main {
 
             if (cmd.hasOption("c")) {
                 isCorpus = true;
+                corpusDir = cmd.getOptionValue("c");
+
             }
 
             if (cmd.hasOption("v")) {
@@ -95,34 +101,51 @@ public class Main {
         }
 
         StopWordsFileReader stopReader = new StopWordsFileReader(new File(stopWordsFilename));
+        List<String> stopWords = stopReader.getStopWords();
+
         FileWordParser wordParser = new FileWordParser(new File(filename));
-        TextAnalyzer analyzer = new TextAnalyzer(stopReader, scoring);
-        analyzer.addText(wordParser);
+        TextAnalyzer analyzer = new TextAnalyzer(stopWords, scoring);
+
+        analyzer.addText(wordParser.getLines());
+        TextAnalyzer fullCorpusAnalyzer = new TextAnalyzer(stopWords, scoring);
 
 
         List<ScoredWord> keywords1 = null;
         List<ScoredWord> keywords2 = null;
+
         if (isCorpus) {
-
-        } else {
-
-            if (analysisKind.equals("single")) {
-                keywords1 = analyzer.getKeyWordsSingle(n);
-            } else if (analysisKind.equals("multi")) {
-                keywords1 = analyzer.getKeywords(n);
-            } else {
-                FileWordParser allText = new FileWordParser(new File(filename));
-                keywords1 = analyzer.getAbstract(allText, n);
-            }
-
-            if (hasVisualization) {
-                CloudVisualization v = new CloudVisualization();
-                v.addDataSet(filename, keywords1);
-                v.createWordCloud(visualizationFilename);
+            corpusDirFile = new File(corpusDir);
+            for(File f : corpusDirFile.listFiles()) {
+                if (f.toString().endsWith(".txt")) {
+                    FileWordParser parserFull = new FileWordParser(f);
+                    fullCorpusAnalyzer.addText(parserFull.getLines());  // used for reference visualization
+                    FileWordParser parserCorpus = new FileWordParser(f);
+                    analyzer.addCorpus(parserCorpus.getLines());
+                }
             }
         }
 
+        if (analysisKind.equals("single")) {
+            keywords1 = analyzer.getKeyWordsSingle(n);
+            if (isCorpus) keywords2 = fullCorpusAnalyzer.getKeyWordsSingle(n);
+        } else if (analysisKind.equals("multi")) {
+            keywords1 = analyzer.getKeywords(n);
+            if (isCorpus) keywords2 = fullCorpusAnalyzer.getKeywords(n);
+        } else {
+            keywords1 = analyzer.getAbstract(n);
+            if(isCorpus) keywords2 = fullCorpusAnalyzer.getAbstract(n);
+        }
+
+        if (hasVisualization) {
+            CloudVisualization v = new CloudVisualization();
+            v.addDataSet(filename, keywords1);
+            if (isCorpus) v.addDataSet("Full Corpus", keywords2);
+            v.createWordCloud(visualizationFilename);
+        }
+
+
         for (ScoredWord sw : keywords1) {
+            //System.out.print(sw.word + ".  ");
             System.out.println(sw);
         }
     }
