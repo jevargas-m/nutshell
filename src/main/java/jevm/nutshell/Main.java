@@ -159,9 +159,10 @@ public class Main {
     private static void processCorpus(String corpusDir, TextAnalyzer analyzer, TextAnalyzer fullCorpusAnalyzer) throws FileNotFoundException {
         File corpusDirFile;
         corpusDirFile = new File(corpusDir);
-        try (ProgressBar pb = new ProgressBar("Processing corpus: " + corpusDir, corpusDirFile.listFiles().length * 3)) {
+        try (ProgressBar pb = new ProgressBar("corpus", corpusDirFile.listFiles().length * 3)) {
             for(File f : corpusDirFile.listFiles()) {
                 if (f.toString().endsWith(".txt")) {
+                    pb.setExtraMessage(f.toString());
                     FileWordParser parserCorpus = new FileWordParser(f);
                     List<String> lines = parserCorpus.getLines();
                     pb.step();

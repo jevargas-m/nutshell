@@ -172,7 +172,7 @@ public class TextAnalyzer {
         switch ( strategy ) {
 
             case "RELATIVE_DEGREE" :
-                score = (double) (data.weightedInDegree + data.weightedOutDegree) / relFreq;
+                score = (double) (data.weightedInDegree + data.weightedOutDegree) / data.frequency;
                 break;
 
             case "WEIGHTED_DEGREE" :
@@ -292,7 +292,7 @@ public class TextAnalyzer {
             scoredLines.add(sc);
         }
 
-        for(int i = 0; i < 20; i++) {
+        for(int i = 0; i < n; i++) {
             if (scoredLines.isEmpty()) {
                 break;
             }
