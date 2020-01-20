@@ -35,6 +35,7 @@
     </properties>
 
     <build>
+        <finalName>nutshell</finalName>
         <plugins>
 
             <plugin>
