@@ -287,8 +287,8 @@ public class TextAnalyzer {
         for(String line : setOfLines) {
             if (line.length() < DEFAULT_MIN_LENGTH) continue;
             double score = scoreString(line);
-            String capitalizedLine = line.substring(0, 1).toUpperCase() + line.substring(1);
-            ScoredWord sc = new ScoredWord(capitalizedLine, score);
+
+            ScoredWord sc = new ScoredWord(line, score);
             scoredLines.add(sc);
         }
 
@@ -300,6 +300,29 @@ public class TextAnalyzer {
            output.add(scoredLines.remove());
         }
         return output;
+    }
+
+    public String getTextAbstract(int n) {
+        List<ScoredWord> keyScoredPhrases = getAbstract(n);
+
+        List<String> keyPhrases = new ArrayList<>(n);
+        for (ScoredWord sw : keyScoredPhrases) {
+            keyPhrases.add(sw.word);
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        for (String line : textLines) {
+
+            if (keyPhrases.contains(line)) {
+                String capitalizedLine = line.substring(0, 1).toUpperCase() + line.substring(1);
+                sb.append(capitalizedLine);
+                sb.append(". ");
+            }
+        }
+
+        return sb.toString();
+
     }
 
     /**
