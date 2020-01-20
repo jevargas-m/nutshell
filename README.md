@@ -48,4 +48,4 @@ Nutshell builds a weighed directed graph of word co-ocurrences.
 When comparing a word vs the full corpus scoring of a word in the file under ananlysis is considering as relative vs the corpus, with exception to entropy which is considered additive.
 
 ### Dependencies
-See `pom.xml` for Maven dependencies.
+See `pom.xml` for Maven dependencies.  For building using maven `mvn install`
