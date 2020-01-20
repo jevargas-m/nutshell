@@ -6,7 +6,7 @@
 
     <groupId>jevm.nutshell</groupId>
     <artifactId>nutshell</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0-Beta</version>
     <dependencies>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
