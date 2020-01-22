@@ -37,6 +37,7 @@ public class Main {
         options.addOption("om", true, "Muti-word keyword output <n>");
         options.addOption("os", true, "Single-word keyword output <n>");
         options.addOption("oa", true, "Abstract output <n>");
+        options.addOption("oat", true, "Abstract text output <n>");
         options.addOption("c", true, "Optional: Corpus differential analysis vs all .txt files in the supplied dir");
         options.addOption("v", false, "Optional: Create Visualization nutshell.html file");
         options.addOption("sc", true, "Optional: Scoring options:" + Arrays.toString(scoringOptions));
@@ -88,6 +89,11 @@ public class Main {
             } else if (cmd.hasOption("oa")) {
                 analysisKind = "abstract";
                 n = Integer.parseInt(cmd.getOptionValue("oa"));
+
+            } else if (cmd.hasOption("oat")) {
+                analysisKind = "abstractText";
+                n = Integer.parseInt(cmd.getOptionValue("oat"));
+
             } else {
                 throw new IllegalArgumentException();
             }
@@ -98,6 +104,7 @@ public class Main {
 
             List<ScoredWord> keywords1 = null;
             List<ScoredWord> keywords2 = null;
+            String out;
 
             /* program controller */
 
@@ -116,17 +123,28 @@ public class Main {
                 processCorpus(corpusDir, analyzer, fullCorpusAnalyzer);
             }
 
-            if(analysisKind.equals("single")) {
-                keywords1 = analyzer.getKeyWordsSingle(n);
-                if (isCorpus) keywords2 = fullCorpusAnalyzer.getKeyWordsSingle(n);
+            switch (analysisKind) {
+                case "single":
+                    keywords1 = analyzer.getKeyWordsSingle(n);
+                    if (isCorpus) keywords2 = fullCorpusAnalyzer.getKeyWordsSingle(n);
 
-            } else if(analysisKind.equals("multi")) {
-                keywords1 = analyzer.getKeywords(n);
-                if (isCorpus) keywords2 = fullCorpusAnalyzer.getKeywords(n);
+                    break;
+                case "multi":
+                    keywords1 = analyzer.getKeywords(n);
+                    if (isCorpus) keywords2 = fullCorpusAnalyzer.getKeywords(n);
 
-            } else {
-                keywords1 = analyzer.getAbstract(n);
-                if (isCorpus) keywords2 = fullCorpusAnalyzer.getAbstract(n);
+                    break;
+                case "abstract":
+                    keywords1 = analyzer.getAbstract(n);
+                    if (isCorpus) keywords2 = fullCorpusAnalyzer.getAbstract(n);
+
+                    break;
+                case "abstractText":
+                    out = analyzer.getTextAbstract(n);
+                    if (isCorpus) out = fullCorpusAnalyzer.getTextAbstract(n);
+
+                    System.out.println(out);
+                    return;
             }
 
             if(hasVisualization) {
